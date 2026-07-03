@@ -1,0 +1,5 @@
+[
+  { "name": "UFRO", "full": "Universidad de La Frontera", "city": "Temuco · Araucanía", "color": "#2563eb" },
+  { "name": "UdeC", "full": "Universidad de Concepción", "city": "Concepción · Biobío", "color": "#0ea5e9" },
+  { "name": "USACH", "full": "Universidad de Santiago de Chile", "city": "Santiago · Metropolitana", "color": "#6366f1" }
+]
