@@ -19,6 +19,14 @@ const router = createRouter({
     { path: '/comparar', name: 'comparar', component: () => import('@/views/CompararView.vue') },
     { path: '/favoritas', name: 'favoritas', component: () => import('@/views/FavoritasView.vue') },
     { path: '/test-vocacional', name: 'test-vocacional', component: () => import('@/views/TestVocacionalView.vue') },
+    { path: '/prueba-paes', name: 'prueba-paes', component: () => import('@/views/PruebaPaesView.vue') },
+    {
+      path: '/prueba-paes/:materia',
+      name: 'prueba-paes-materia',
+      component: () => import('@/views/PruebaPaesMateriaView.vue'),
+    },
+    { path: '/puntajes', name: 'puntajes', component: () => import('@/views/PuntajesView.vue') },
+    { path: '/simulador', name: 'simulador', component: () => import('@/views/SimuladorView.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })
