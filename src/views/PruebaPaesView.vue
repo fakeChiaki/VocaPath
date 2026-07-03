@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import type { MateriaPaes } from '@/types'
 import { MATERIAS_PAES, PRUEBAS_PAES } from '@/utils/carreras'
 import { useScoresStore } from '@/stores/scores'
 
 const scores = useScoresStore()
+
+function textoBadge(materia: MateriaPaes): string {
+  const pts = scores.puntajes[materia]
+  const base = pts != null ? `${pts} pts` : 'Rendida'
+  const mencion = scores.mencionesRendidas[materia]
+  const menciones = PRUEBAS_PAES[materia].menciones
+  return mencion && menciones ? `${base} · ${menciones[mencion].label}` : base
+}
 </script>
 
 <template>
@@ -24,7 +33,7 @@ const scores = useScoresStore()
             v-if="scores.estaRendida(materia)"
             class="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold text-green-700"
           >
-            {{ scores.puntajes[materia] != null ? `${scores.puntajes[materia]} pts` : 'Rendida' }}
+            {{ textoBadge(materia) }}
           </span>
         </div>
         <div class="mt-4 mb-1 font-display text-[19px] font-bold">{{ PRUEBAS_PAES[materia].label }}</div>

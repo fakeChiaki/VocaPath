@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { MateriaPaes, RespuestasPaes } from '@/types'
+import type { MateriaPaes, MencionCiencias, PreguntaPaes, RespuestasPaes } from '@/types'
 import { MATERIAS_PAES, PRUEBAS_PAES, puntajePaes } from '@/utils/carreras'
 import { useScoresStore } from '@/stores/scores'
 import CacheWarning from '@/components/layout/CacheWarning.vue'
@@ -13,6 +13,31 @@ const scores = useScoresStore()
 const materia = computed(() => route.params.materia as MateriaPaes)
 const prueba = computed(() => PRUEBAS_PAES[materia.value])
 
+const mencion = computed<MencionCiencias | null>(() => {
+  const m = route.query.mencion
+  const menciones = prueba.value?.menciones
+  return typeof m === 'string' && menciones && m in menciones ? (m as MencionCiencias) : null
+})
+const requiereMencion = computed(() => !!prueba.value?.menciones && !mencion.value)
+
+const preguntas = computed<PreguntaPaes[]>(() => {
+  const p = prueba.value
+  if (!p) return []
+  if (p.menciones) return mencion.value ? p.menciones[mencion.value].qs : []
+  return p.qs ?? []
+})
+
+const etiqueta = computed(() => {
+  const p = prueba.value
+  if (p?.menciones && mencion.value) return `${p.label} · Mención ${p.menciones[mencion.value].label}`
+  return p?.label ?? ''
+})
+const icono = computed(() => {
+  const p = prueba.value
+  if (p?.menciones && mencion.value) return p.menciones[mencion.value].icon
+  return p?.icon ?? ''
+})
+
 const respuestas = ref<RespuestasPaes>({})
 const finalizada = ref(false)
 
@@ -21,8 +46,16 @@ function iniciar() {
     router.replace('/prueba-paes')
     return
   }
+  // Al revisar ciencias, restaurar la mención con la que se rindió
+  if (requiereMencion.value && route.query.revisar != null) {
+    const rendida = scores.mencionesRendidas[materia.value]
+    if (rendida) {
+      router.replace({ query: { revisar: '1', mencion: rendida } })
+      return
+    }
+  }
   const guardadas = scores.respuestasGuardadas[materia.value]
-  if (route.query.revisar != null && guardadas && scores.estaRendida(materia.value)) {
+  if (route.query.revisar != null && guardadas && scores.estaRendida(materia.value) && !requiereMencion.value) {
     respuestas.value = { ...guardadas }
     finalizada.value = true
   } else {
@@ -31,13 +64,17 @@ function iniciar() {
   }
 }
 
-watch(() => [route.params.materia, route.query.revisar], iniciar, { immediate: true })
+watch(() => [route.params.materia, route.query.revisar, route.query.mencion], iniciar, { immediate: true })
 
-const total = computed(() => prueba.value.qs.length)
+function elegirMencion(m: MencionCiencias) {
+  router.push({ query: { mencion: m } })
+}
+
+const total = computed(() => preguntas.value.length)
 const respondidas = computed(() => Object.keys(respuestas.value).length)
-const correctas = computed(() => prueba.value.qs.filter((q, i) => respuestas.value[i] === q.c).length)
+const correctas = computed(() => preguntas.value.filter((q, i) => respuestas.value[i] === q.c).length)
 const puntaje = computed(() => puntajePaes(correctas.value, total.value))
-const puedeEnviar = computed(() => respondidas.value === total.value)
+const puedeEnviar = computed(() => total.value > 0 && respondidas.value === total.value)
 
 function elegir(pregunta: number, opcion: number) {
   if (finalizada.value) return
@@ -46,7 +83,7 @@ function elegir(pregunta: number, opcion: number) {
 
 function finalizar() {
   if (!puedeEnviar.value) return
-  scores.guardarResultadoPaes(materia.value, { ...respuestas.value }, puntaje.value)
+  scores.guardarResultadoPaes(materia.value, { ...respuestas.value }, puntaje.value, mencion.value ?? undefined)
   finalizada.value = true
   window.scrollTo({ top: 0 })
 }
@@ -62,7 +99,7 @@ function claseOpcion(pregunta: number, opcion: number): string {
   if (!finalizada.value) {
     return sel === opcion ? 'border-blue-600 bg-[#e7f0ff]' : 'border-line bg-white hover:border-blue-300'
   }
-  const correcta = prueba.value.qs[pregunta]!.c
+  const correcta = preguntas.value[pregunta]!.c
   if (opcion === correcta) return 'border-emerald-500 bg-emerald-50 text-emerald-700'
   if (sel === opcion) return 'border-red-500 bg-red-50 text-red-700'
   return 'border-line bg-white'
@@ -70,7 +107,7 @@ function claseOpcion(pregunta: number, opcion: number): string {
 
 function marcaOpcion(pregunta: number, opcion: number): string {
   if (!finalizada.value) return ''
-  const correcta = prueba.value.qs[pregunta]!.c
+  const correcta = preguntas.value[pregunta]!.c
   if (opcion === correcta) return '✓'
   if (respuestas.value[pregunta] === opcion) return '✗'
   return ''
@@ -85,13 +122,47 @@ function marcaOpcion(pregunta: number, opcion: number): string {
     >
       ← Volver a materias
     </RouterLink>
-    <div class="max-w-[760px]">
+
+    <!-- Selector de mención (Ciencias) -->
+    <div v-if="requiereMencion" class="max-w-[760px]">
       <div class="mb-2 flex items-center gap-3.5">
         <span class="flex size-11.5 items-center justify-center rounded-[13px] bg-surface text-2xl">
           {{ prueba.icon }}
         </span>
         <div>
           <h1 class="font-display text-[26px] font-bold">{{ prueba.label }}</h1>
+          <div class="text-[13px] text-slate-500">
+            Como en la PAES real, debes elegir una mención para rendir esta prueba.
+          </div>
+        </div>
+      </div>
+      <div class="mt-4.5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <button
+          v-for="(m, key) in prueba.menciones"
+          :key="key"
+          class="cursor-pointer rounded-[18px] border border-line bg-white p-6 text-left transition-all duration-150 hover:-translate-y-0.75 hover:border-blue-200 hover:shadow-xl hover:shadow-slate-900/10"
+          @click="elegirMencion(key)"
+        >
+          <span class="flex size-13 items-center justify-center rounded-[14px] bg-surface text-[26px]">
+            {{ m.icon }}
+          </span>
+          <div class="mt-4 mb-1 font-display text-[19px] font-bold">{{ m.label }}</div>
+          <div class="text-[13px] text-slate-500">
+            {{ scores.mencionesRendidas[materia] === key ? 'Mención rendida anteriormente' : 'Rendir con esta mención' }}
+            →
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Rendición / revisión -->
+    <div v-else class="max-w-[760px]">
+      <div class="mb-2 flex items-center gap-3.5">
+        <span class="flex size-11.5 items-center justify-center rounded-[13px] bg-surface text-2xl">
+          {{ icono }}
+        </span>
+        <div>
+          <h1 class="font-display text-[26px] font-bold">{{ etiqueta }}</h1>
           <div class="text-[13px] text-slate-500">{{ respondidas }} de {{ total }} respondidas</div>
         </div>
       </div>
@@ -119,7 +190,7 @@ function marcaOpcion(pregunta: number, opcion: number): string {
       />
 
       <div class="mt-4.5 flex flex-col gap-4">
-        <div v-for="(q, i) in prueba.qs" :key="i" class="rounded-[18px] border border-line bg-white p-6">
+        <div v-for="(q, i) in preguntas" :key="i" class="rounded-[18px] border border-line bg-white p-6">
           <div class="mb-4 font-display text-[17px] font-bold">{{ i + 1 }}. {{ q.t }}</div>
           <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <button

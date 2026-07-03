@@ -32,11 +32,37 @@
   "ciencias": {
     "label": "Ciencias",
     "icon": "🔬",
-    "qs": [
-      { "t": "La unidad básica de la vida es:", "o": ["El átomo", "La célula", "El tejido", "La molécula"], "c": 1 },
-      { "t": "El agua está compuesta por hidrógeno y:", "o": ["Carbono", "Oxígeno", "Nitrógeno", "Helio"], "c": 1 },
-      { "t": "La fuerza que atrae los objetos a la Tierra es:", "o": ["Magnetismo", "Gravedad", "Fricción", "Tensión"], "c": 1 },
-      { "t": "¿Qué órgano bombea la sangre?", "o": ["Pulmón", "Corazón", "Hígado", "Riñón"], "c": 1 }
-    ]
+    "menciones": {
+      "biologia": {
+        "label": "Biología",
+        "icon": "🧬",
+        "qs": [
+          { "t": "La unidad básica de la vida es:", "o": ["El átomo", "La célula", "El tejido", "La molécula"], "c": 1 },
+          { "t": "¿Qué órgano bombea la sangre?", "o": ["Pulmón", "Corazón", "Hígado", "Riñón"], "c": 1 },
+          { "t": "La fotosíntesis ocurre principalmente en:", "o": ["Las hojas", "La raíz", "El tallo", "La flor"], "c": 0 },
+          { "t": "La molécula que contiene la información genética es:", "o": ["La proteína", "La glucosa", "El ADN", "El lípido"], "c": 2 }
+        ]
+      },
+      "fisica": {
+        "label": "Física",
+        "icon": "⚛️",
+        "qs": [
+          { "t": "La fuerza que atrae los objetos a la Tierra es:", "o": ["Magnetismo", "Gravedad", "Fricción", "Tensión"], "c": 1 },
+          { "t": "La unidad de fuerza en el Sistema Internacional es:", "o": ["El newton", "El joule", "El watt", "El pascal"], "c": 0 },
+          { "t": "La rapidez media se calcula como:", "o": ["distancia × tiempo", "masa × aceleración", "distancia / tiempo", "tiempo / distancia"], "c": 2 },
+          { "t": "El sonido NO se propaga en:", "o": ["El agua", "El vacío", "El aire", "Los sólidos"], "c": 1 }
+        ]
+      },
+      "quimica": {
+        "label": "Química",
+        "icon": "⚗️",
+        "qs": [
+          { "t": "El agua está compuesta por hidrógeno y:", "o": ["Carbono", "Oxígeno", "Nitrógeno", "Helio"], "c": 1 },
+          { "t": "El pH de una solución neutra es:", "o": ["0", "7", "14", "1"], "c": 1 },
+          { "t": "El símbolo químico del sodio es:", "o": ["S", "Na", "So", "N"], "c": 1 },
+          { "t": "El cambio de estado de líquido a gas se llama:", "o": ["Condensación", "Fusión", "Evaporación", "Solidificación"], "c": 2 }
+        ]
+      }
+    }
   }
 }

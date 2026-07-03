@@ -51,10 +51,19 @@ export interface PreguntaPaes {
   c: number
 }
 
-export interface PruebaPaes {
+export type MencionCiencias = 'biologia' | 'fisica' | 'quimica'
+
+export interface MencionPaes {
   label: string
   icon: string
   qs: PreguntaPaes[]
+}
+
+export interface PruebaPaes {
+  label: string
+  icon: string
+  qs?: PreguntaPaes[]
+  menciones?: Record<MencionCiencias, MencionPaes>
 }
 
 export type PuntajesUsuario = Record<FactorPuntaje, number | null>
