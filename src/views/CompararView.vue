@@ -19,9 +19,14 @@ interface FilaComparacion {
   bColor: string
 }
 
-function colorPar(a: number, b: number): [string, string] {
-  if (a === b) return ['#0f172a', '#0f172a']
-  return a > b ? ['#2563eb', '#0f172a'] : ['#0f172a', '#2563eb']
+const NEUTRO = '#0f172a'
+const MEJOR = '#059669'
+
+// Resalta en verde el valor "mejor" solo cuando más alto = objetivamente mejor (p. ej. vacantes).
+// Para corte, puntajes y ponderaciones un número mayor no significa "mejor carrera", así que quedan neutros.
+function colorMayorEsMejor(a: number, b: number): [string, string] {
+  if (a === b) return [NEUTRO, NEUTRO]
+  return a > b ? [MEJOR, NEUTRO] : [NEUTRO, MEJOR]
 }
 
 const filas = computed<FilaComparacion[]>(() => {
@@ -30,21 +35,18 @@ const filas = computed<FilaComparacion[]>(() => {
 
   const out: FilaComparacion[] = []
 
-  const [corteAColor, corteBColor] = colorPar(ca.ultimo, cb.ultimo)
-  out.push({ label: 'Puntaje de corte 2025', a: ca.ultimo.toFixed(1), b: cb.ultimo.toFixed(1), aColor: corteAColor, bColor: corteBColor })
+  out.push({ label: 'Puntaje de corte 2025', a: ca.ultimo.toFixed(1), b: cb.ultimo.toFixed(1), aColor: NEUTRO, bColor: NEUTRO })
 
-  const [primeroAColor, primeroBColor] = colorPar(ca.primero, cb.primero)
-  out.push({ label: 'Primer seleccionado', a: ca.primero.toFixed(1), b: cb.primero.toFixed(1), aColor: primeroAColor, bColor: primeroBColor })
+  out.push({ label: 'Primer seleccionado', a: ca.primero.toFixed(1), b: cb.primero.toFixed(1), aColor: NEUTRO, bColor: NEUTRO })
 
-  const [vacantesAColor, vacantesBColor] = colorPar(ca.vacantes, cb.vacantes)
+  const [vacantesAColor, vacantesBColor] = colorMayorEsMejor(ca.vacantes, cb.vacantes)
   out.push({ label: 'Vacantes', a: String(ca.vacantes), b: String(cb.vacantes), aColor: vacantesAColor, bColor: vacantesBColor })
 
-  out.push({ label: 'Duración', a: ca.duracion, b: cb.duracion, aColor: '#0f172a', bColor: '#0f172a' })
+  out.push({ label: 'Duración', a: ca.duracion, b: cb.duracion, aColor: NEUTRO, bColor: NEUTRO })
 
   for (const k of FACTOR_KEYS) {
     if (ca.pond[k] === 0 && cb.pond[k] === 0) continue
-    const [aColor, bColor] = colorPar(ca.pond[k], cb.pond[k])
-    out.push({ label: `Ponderación ${FACTOR_LABEL[k]}`, a: `${ca.pond[k]}%`, b: `${cb.pond[k]}%`, aColor, bColor })
+    out.push({ label: `Ponderación ${FACTOR_LABEL[k]}`, a: `${ca.pond[k]}%`, b: `${cb.pond[k]}%`, aColor: NEUTRO, bColor: NEUTRO })
   }
 
   return out
