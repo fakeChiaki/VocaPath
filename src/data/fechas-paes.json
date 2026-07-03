@@ -1,0 +1,10 @@
+[
+  { "fase": "Inscripción", "titulo": "Inicio inscripción PAES", "fecha": "2 de junio de 2026", "estado": "Próximo", "icon": "📝" },
+  { "fase": "Inscripción", "titulo": "Cierre de inscripción", "fecha": "4 de agosto de 2026", "estado": "Próximo", "icon": "⏳" },
+  { "fase": "Rendición", "titulo": "Comp. Lectora y Comp. Matemática 1", "fecha": "24 de noviembre de 2026", "estado": "Programado", "icon": "📖" },
+  { "fase": "Rendición", "titulo": "Historia y Cs. Sociales · Ciencias", "fecha": "25 de noviembre de 2026", "estado": "Programado", "icon": "🔬" },
+  { "fase": "Rendición", "titulo": "Comp. Matemática 2 (electiva)", "fecha": "26 de noviembre de 2026", "estado": "Programado", "icon": "📐" },
+  { "fase": "Resultados", "titulo": "Publicación de puntajes", "fecha": "2 de enero de 2027", "estado": "Programado", "icon": "🎯" },
+  { "fase": "Postulación", "titulo": "Postulación a universidades", "fecha": "3 al 6 de enero de 2027", "estado": "Programado", "icon": "🏛️" },
+  { "fase": "Resultados", "titulo": "Resultados de selección", "fecha": "19 de enero de 2027", "estado": "Programado", "icon": "✅" }
+]

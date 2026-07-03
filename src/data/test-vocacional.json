@@ -1,0 +1,52 @@
+[
+  {
+    "id": "q1",
+    "text": "¿Qué actividad disfrutas más en tu tiempo libre?",
+    "opts": [
+      { "label": "Resolver problemas de lógica o programar", "area": "ingenieria" },
+      { "label": "Cuidar o ayudar a otras personas", "area": "salud" },
+      { "label": "Leer, escribir o debatir ideas", "area": "social" },
+      { "label": "Dibujar, diseñar o crear cosas", "area": "arte" }
+    ]
+  },
+  {
+    "id": "q2",
+    "text": "¿En qué asignatura te va mejor?",
+    "opts": [
+      { "label": "Matemática", "area": "ingenieria" },
+      { "label": "Biología / Química", "area": "salud" },
+      { "label": "Lenguaje / Historia", "area": "social" },
+      { "label": "Economía / Emprendimiento", "area": "negocios" }
+    ]
+  },
+  {
+    "id": "q3",
+    "text": "¿Qué tipo de impacto te gustaría tener?",
+    "opts": [
+      { "label": "Mejorar la salud de las personas", "area": "salud" },
+      { "label": "Educar y formar a otros", "area": "educacion" },
+      { "label": "Defender la justicia y los derechos", "area": "derecho" },
+      { "label": "Crear productos o negocios innovadores", "area": "negocios" }
+    ]
+  },
+  {
+    "id": "q4",
+    "text": "¿Cómo prefieres trabajar?",
+    "opts": [
+      { "label": "Con tecnología y datos", "area": "ingenieria" },
+      { "label": "En equipo, con mucha gente", "area": "social" },
+      { "label": "Con creatividad y diseño", "area": "arte" },
+      { "label": "Liderando y tomando decisiones", "area": "negocios" }
+    ]
+  },
+  {
+    "id": "q5",
+    "text": "¿Qué frase te representa más?",
+    "opts": [
+      { "label": "Quiero entender cómo funciona todo", "area": "ingenieria" },
+      { "label": "Quiero cuidar y sanar a los demás", "area": "salud" },
+      { "label": "Quiero enseñar y dejar huella", "area": "educacion" },
+      { "label": "Quiero comunicar y mover ideas", "area": "social" }
+    ]
+  }
+]

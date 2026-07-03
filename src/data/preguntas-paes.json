@@ -1,0 +1,68 @@
+{
+  "lectora": {
+    "label": "Comp. Lectora",
+    "icon": "📖",
+    "qs": [
+      { "t": "¿Cuál es la función del conector \"no obstante\"?", "o": ["Añadir información", "Expresar contraste", "Indicar causa", "Ordenar ideas"], "c": 1 },
+      { "t": "Un texto argumentativo busca principalmente:", "o": ["Narrar hechos", "Convencer al lector", "Describir un lugar", "Entretener"], "c": 1 },
+      { "t": "La idea principal de un párrafo suele estar en:", "o": ["La oración temática", "Una nota al pie", "El título del libro", "La bibliografía"], "c": 0 },
+      { "t": "\"Sinónimo\" significa palabra de significado:", "o": ["Opuesto", "Similar", "Técnico", "Extranjero"], "c": 1 }
+    ]
+  },
+  "matematica": {
+    "label": "Comp. Matemática 1",
+    "icon": "📐",
+    "qs": [
+      { "t": "¿Cuánto es 15% de 240?", "o": ["24", "36", "30", "45"], "c": 1 },
+      { "t": "Si x + 7 = 12, entonces x =", "o": ["4", "5", "6", "19"], "c": 1 },
+      { "t": "El área de un triángulo de base 8 y altura 5 es:", "o": ["20", "40", "13", "26"], "c": 0 },
+      { "t": "¿Cuál es el promedio de 4, 8 y 12?", "o": ["6", "8", "10", "12"], "c": 1 }
+    ]
+  },
+  "historia": {
+    "label": "Historia y Cs. Sociales",
+    "icon": "🏛️",
+    "qs": [
+      { "t": "La Constitución vigente de Chile fue promulgada en:", "o": ["1925", "1980", "1990", "2005"], "c": 1 },
+      { "t": "¿Qué poder del Estado crea las leyes?", "o": ["Ejecutivo", "Legislativo", "Judicial", "Municipal"], "c": 1 },
+      { "t": "La Revolución Industrial se inició en:", "o": ["Francia", "Inglaterra", "Alemania", "EE.UU."], "c": 1 },
+      { "t": "El PIB mide principalmente:", "o": ["La población", "La producción de bienes y servicios", "El clima", "La educación"], "c": 1 }
+    ]
+  },
+  "ciencias": {
+    "label": "Ciencias",
+    "icon": "🔬",
+    "menciones": {
+      "biologia": {
+        "label": "Biología",
+        "icon": "🧬",
+        "qs": [
+          { "t": "La unidad básica de la vida es:", "o": ["El átomo", "La célula", "El tejido", "La molécula"], "c": 1 },
+          { "t": "¿Qué órgano bombea la sangre?", "o": ["Pulmón", "Corazón", "Hígado", "Riñón"], "c": 1 },
+          { "t": "La fotosíntesis ocurre principalmente en:", "o": ["Las hojas", "La raíz", "El tallo", "La flor"], "c": 0 },
+          { "t": "La molécula que contiene la información genética es:", "o": ["La proteína", "La glucosa", "El ADN", "El lípido"], "c": 2 }
+        ]
+      },
+      "fisica": {
+        "label": "Física",
+        "icon": "⚛️",
+        "qs": [
+          { "t": "La fuerza que atrae los objetos a la Tierra es:", "o": ["Magnetismo", "Gravedad", "Fricción", "Tensión"], "c": 1 },
+          { "t": "La unidad de fuerza en el Sistema Internacional es:", "o": ["El newton", "El joule", "El watt", "El pascal"], "c": 0 },
+          { "t": "La rapidez media se calcula como:", "o": ["distancia × tiempo", "masa × aceleración", "distancia / tiempo", "tiempo / distancia"], "c": 2 },
+          { "t": "El sonido NO se propaga en:", "o": ["El agua", "El vacío", "El aire", "Los sólidos"], "c": 1 }
+        ]
+      },
+      "quimica": {
+        "label": "Química",
+        "icon": "⚗️",
+        "qs": [
+          { "t": "El agua está compuesta por hidrógeno y:", "o": ["Carbono", "Oxígeno", "Nitrógeno", "Helio"], "c": 1 },
+          { "t": "El pH de una solución neutra es:", "o": ["0", "7", "14", "1"], "c": 1 },
+          { "t": "El símbolo químico del sodio es:", "o": ["S", "Na", "So", "N"], "c": 1 },
+          { "t": "El cambio de estado de líquido a gas se llama:", "o": ["Condensación", "Fusión", "Evaporación", "Solidificación"], "c": 2 }
+        ]
+      }
+    }
+  }
+}
