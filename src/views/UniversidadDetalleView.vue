@@ -4,15 +4,17 @@ import { useRoute, useRouter } from 'vue-router'
 import CareerSearchBar from '@/components/careers/CareerSearchBar.vue'
 import { useCareerFilter } from '@/composables/useCareerFilter'
 import { useFavoritesStore } from '@/stores/favorites'
-import { AREA_LABEL, CARRERAS, getUniversidad } from '@/utils/carreras'
+import { formatPuntaje } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 
 const route = useRoute()
 const router = useRouter()
 const favorites = useFavoritesStore()
+const catalog = useCatalogStore()
 
-const universidad = computed(() => getUniversidad(route.params.nombre as string))
+const universidad = computed(() => catalog.getUniversidad(route.params.id as string))
 
-const carrerasUni = computed(() => CARRERAS.filter((c) => c.uni === universidad.value?.name))
+const carrerasUni = computed(() => catalog.careers.filter((c) => c.uniId === universidad.value?.id))
 
 const { search, filtradas } = useCareerFilter(carrerasUni)
 
@@ -58,7 +60,7 @@ function toggleFav(e: Event, id: string) {
         @click="abrirCarrera(c.id)"
       >
         <div class="flex items-start justify-between gap-2.5">
-          <span class="text-[13px] text-slate-500">{{ AREA_LABEL[c.area] }}</span>
+          <span class="text-[13px] text-slate-500">{{ c.areaLabel }}</span>
           <button
             class="size-8.5 cursor-pointer rounded-[10px] border-none text-base"
             :class="favorites.has(c.id) ? 'bg-[#fff1f3] text-rose-600' : 'bg-slate-100 text-slate-400'"
@@ -71,8 +73,8 @@ function toggleFav(e: Event, id: string) {
         <div class="mt-2 mb-4 font-display text-lg leading-tight font-bold">{{ c.nombre }}</div>
         <div class="flex gap-2.5">
           <div class="flex-1 rounded-[11px] bg-surface px-3 py-2.5">
-            <div class="text-[11px] text-slate-500">Corte 2025</div>
-            <div class="font-display text-base font-bold text-blue-600">{{ c.ultimo.toFixed(1) }}</div>
+            <div class="text-[11px] text-slate-500">Corte</div>
+            <div class="font-display text-base font-bold text-blue-600">{{ formatPuntaje(c.ultimo, '—') }}</div>
           </div>
           <div class="flex-1 rounded-[11px] bg-surface px-3 py-2.5">
             <div class="text-[11px] text-slate-500">Vacantes</div>

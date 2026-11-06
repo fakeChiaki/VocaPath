@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { AREA_LABEL, factoresPonderados, getCarrera } from '@/utils/carreras'
+import { factoresPonderados, formatPuntaje, SIN_DATO } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useCompareStore } from '@/stores/compare'
 
@@ -9,18 +10,19 @@ const route = useRoute()
 const router = useRouter()
 const favorites = useFavoritesStore()
 const compare = useCompareStore()
+const catalog = useCatalogStore()
 
-const carrera = computed(() => getCarrera(route.params.id as string))
+const carrera = computed(() => catalog.getCarrera(route.params.id as string))
 
 const meta = computed(() => {
   const c = carrera.value
   if (!c) return []
   return [
-    { l: 'Título profesional', v: c.titulo },
-    { l: 'Grado académico', v: c.grado },
-    { l: 'Duración', v: c.duracion },
-    { l: 'Código', v: c.codigo },
-    { l: 'Régimen de estudios', v: c.regimen },
+    { l: 'Título profesional', v: c.titulo ?? SIN_DATO },
+    { l: 'Grado académico', v: c.grado ?? SIN_DATO },
+    { l: 'Duración', v: c.duracion ?? SIN_DATO },
+    { l: 'Código', v: c.codigo ?? SIN_DATO },
+    { l: 'Régimen de estudios', v: c.regimen ?? SIN_DATO },
   ]
 })
 
@@ -63,12 +65,12 @@ function irSimulador() {
           class="rounded-[22px] bg-gradient-to-br from-blue-600 to-sky-500 px-8 py-7.5 text-white shadow-xl shadow-blue-600/30"
         >
           <span class="rounded-full bg-white/20 px-2.75 py-1 text-[11px] font-bold">
-            {{ carrera.uni }} · {{ AREA_LABEL[carrera.area] }}
+            {{ carrera.uni }} · {{ carrera.areaLabel }}
           </span>
           <h1 class="mt-3.5 mb-1 font-display text-[34px] leading-tight font-extrabold tracking-tight">
             {{ carrera.nombre }}
           </h1>
-          <div class="text-[15px] opacity-90">{{ carrera.perfil }}</div>
+          <div v-if="carrera.perfil" class="text-[15px] opacity-90">{{ carrera.perfil }}</div>
         </div>
 
         <h3 class="mt-7 mb-3.5 font-display text-lg font-bold">Información de la carrera</h3>
@@ -82,6 +84,16 @@ function irSimulador() {
             <span class="font-display text-[14.5px] font-semibold">{{ m.v }}</span>
           </div>
         </div>
+
+        <a
+          v-if="carrera.malla"
+          :href="carrera.malla"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-3.5 inline-flex items-center gap-2 rounded-[13px] border-[1.5px] border-[#cdd9ea] bg-white px-4.5 py-3 font-display text-[14.5px] font-semibold text-blue-600"
+        >
+          📄 Ver malla curricular
+        </a>
 
         <h3 class="mt-7 mb-3.5 font-display text-lg font-bold">Ponderaciones de admisión</h3>
         <div class="rounded-[18px] border border-line bg-white p-5.5">
@@ -102,15 +114,22 @@ function irSimulador() {
 
       <div class="lg:sticky lg:top-22.5">
         <div class="rounded-[20px] border border-line bg-white p-6 shadow-lg shadow-slate-900/5">
-          <h3 class="mb-4 font-display text-base font-bold">Admisión 2025</h3>
+          <h3 class="mb-4 font-display text-base font-bold">Admisión</h3>
           <div class="grid gap-3">
             <div class="rounded-[14px] bg-[#eff6ff] p-4">
               <div class="text-xs text-blue-500">Puntaje primer seleccionado</div>
-              <div class="font-display text-[28px] font-extrabold text-blue-700">{{ carrera.primero.toFixed(1) }}</div>
+              <div
+                class="font-display font-extrabold text-blue-700"
+                :class="carrera.primero == null ? 'py-1.5 text-lg' : 'text-[28px]'"
+              >
+                {{ formatPuntaje(carrera.primero) }}
+              </div>
             </div>
             <div class="rounded-[14px] bg-surface p-4">
               <div class="text-xs text-slate-500">Puntaje último seleccionado (corte)</div>
-              <div class="font-display text-[28px] font-extrabold">{{ carrera.ultimo.toFixed(1) }}</div>
+              <div class="font-display font-extrabold" :class="carrera.ultimo == null ? 'py-1.5 text-lg' : 'text-[28px]'">
+                {{ formatPuntaje(carrera.ultimo) }}
+              </div>
             </div>
             <div class="rounded-[14px] bg-surface p-4">
               <div class="text-xs text-slate-500">Vacantes</div>

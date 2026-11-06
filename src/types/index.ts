@@ -1,37 +1,34 @@
 export type MateriaPaes = 'lectora' | 'matematica' | 'historia' | 'ciencias'
 
-export type FactorPuntaje = MateriaPaes | 'nem' | 'ranking'
+export type FactorPuntaje = MateriaPaes | 'matematica2' | 'nem' | 'ranking'
 
 export interface Carrera {
   id: string
   nombre: string
   uni: string
-  titulo: string
-  grado: string
-  duracion: string
-  codigo: string
-  regimen: string
-  area: string
+  uniId: string
+  titulo: string | null
+  grado: string | null
+  duracion: string | null
+  codigo: string | null
+  regimen: string | null
+  area: string | null
+  areaLabel: string
   pond: Record<FactorPuntaje, number>
+  historiaOCiencias: boolean
   vacantes: number
-  primero: number
-  ultimo: number
-  perfil: string
+  primero: number | null
+  ultimo: number | null
+  perfil: string | null
+  malla: string | null
 }
 
 export interface Universidad {
+  id: string
   name: string
   full: string
   city: string
   color: string
-}
-
-export interface FechaPaes {
-  fase: string
-  titulo: string
-  fecha: string
-  estado: 'Próximo' | 'Programado' | 'Finalizado'
-  icon: string
 }
 
 export interface OpcionVocacional {

@@ -9,6 +9,7 @@ const scores = useScoresStore()
 const materias: { key: FactorPuntaje; icon: string }[] = [
   { key: 'lectora', icon: '📖' },
   { key: 'matematica', icon: '📐' },
+  { key: 'matematica2', icon: '➗' },
   { key: 'historia', icon: '🏛️' },
   { key: 'ciencias', icon: '🔬' },
   { key: 'nem', icon: '🏅' },
@@ -30,7 +31,7 @@ function onChange(key: FactorPuntaje, e: Event) {
     <div class="mb-5">
       <h1 class="mb-2 font-display text-4xl font-bold tracking-tight">Mis puntajes por materia</h1>
       <p class="text-base text-slate-500">
-        Revisa, ingresa o elimina tus puntajes. {{ scores.registrados }} de 6 registrados.
+        Revisa, ingresa o elimina tus puntajes. {{ scores.registrados }} de 7 registrados.
       </p>
     </div>
 

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useCatalogStore } from '@/stores/catalog'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -22,7 +23,7 @@ const router = createRouter({
     { path: '/carreras/:id', name: 'carrera-detalle', component: () => import('@/views/CarreraDetalleView.vue') },
     { path: '/universidades', name: 'universidades', component: () => import('@/views/UniversidadesView.vue') },
     {
-      path: '/universidades/:nombre',
+      path: '/universidades/:id',
       name: 'universidad-detalle',
       component: () => import('@/views/UniversidadDetalleView.vue'),
     },
@@ -46,8 +47,10 @@ router.beforeEach(async (to) => {
   await auth.init()
 
   if (to.meta.guestOnly) return auth.isAuthenticated ? '/' : true
-  if (to.meta.public || auth.isAuthenticated) return true
-  return { name: 'login', query: { redirect: to.fullPath } }
+  if (to.meta.public) return true
+  if (!auth.isAuthenticated) return { name: 'login', query: { redirect: to.fullPath } }
+  await useCatalogStore().load()
+  return true
 })
 
 export default router

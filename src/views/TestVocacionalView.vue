@@ -2,8 +2,10 @@
 import { computed, ref } from 'vue'
 import type { Carrera, PreguntaVocacional } from '@/types'
 import preguntasData from '@/data/test-vocacional.json'
-import { AREA_LABEL, CARRERAS, uniColor } from '@/utils/carreras'
+import { AREA_LABEL } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 
+const catalog = useCatalogStore()
 const preguntas = preguntasData as PreguntaVocacional[]
 
 const indice = ref(0)
@@ -69,11 +71,11 @@ const topAreas = computed<string[]>(() => {
 const topAreaLabel = computed(() => topAreas.value.map((a) => AREA_LABEL[a] ?? a).join(' y '))
 
 const recomendaciones = computed<Recomendacion[]>(() => {
-  return CARRERAS.filter((c) => topAreas.value.includes(c.area))
+  return catalog.careers.filter((c) => c.area != null && topAreas.value.includes(c.area))
     .slice(0, 4)
     .map((carrera) => ({
       carrera,
-      reason: `Encaja con tu interés en ${(AREA_LABEL[carrera.area] ?? carrera.area).toLowerCase()}: ${carrera.perfil.split('.')[0]}.`,
+      reason: `Encaja con tu interés en ${carrera.areaLabel.toLowerCase()}${carrera.perfil ? `: ${carrera.perfil.split('.')[0]}` : ''}.`,
     }))
 })
 </script>
@@ -152,7 +154,7 @@ const recomendaciones = computed<Recomendacion[]>(() => {
         >
           <span
             class="flex size-11.5 shrink-0 items-center justify-center rounded-[13px] font-display text-[13px] font-extrabold text-white"
-            :style="{ background: uniColor(r.carrera.uni) }"
+            :style="{ background: catalog.uniColor(r.carrera.uni) }"
           >
             {{ r.carrera.uni }}
           </span>
@@ -160,7 +162,7 @@ const recomendaciones = computed<Recomendacion[]>(() => {
             <div class="flex flex-wrap items-center gap-2.5">
               <span class="font-display text-lg font-bold">{{ r.carrera.nombre }}</span>
               <span class="rounded-full bg-[#eff6ff] px-2.25 py-0.75 text-[11px] font-semibold text-blue-600">
-                {{ AREA_LABEL[r.carrera.area] }}
+                {{ r.carrera.areaLabel }}
               </span>
             </div>
             <div class="mt-1.5 text-sm leading-relaxed text-slate-500">{{ r.reason }}</div>

@@ -4,13 +4,14 @@ import { useRouter } from 'vue-router'
 import type { Carrera } from '@/types'
 import CareerCard from '@/components/careers/CareerCard.vue'
 import { useFavoritesStore } from '@/stores/favorites'
-import { getCarrera } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 
 const router = useRouter()
 const favorites = useFavoritesStore()
+const catalog = useCatalogStore()
 
 const favCareers = computed<Carrera[]>(() =>
-  favorites.ids.map((id) => getCarrera(id)).filter((c): c is Carrera => !!c),
+  favorites.ids.map((id) => catalog.getCarrera(id)).filter((c): c is Carrera => !!c),
 )
 </script>
 

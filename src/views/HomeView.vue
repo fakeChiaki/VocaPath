@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { CARRERAS, MATERIAS_PAES, UNIVERSIDADES } from '@/utils/carreras'
+import { MATERIAS_PAES } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
 
 const favorites = useFavoritesStore()
+const catalog = useCatalogStore()
 
 const features = [
   {
@@ -83,11 +85,11 @@ const features = [
         </div>
         <div class="mt-10 flex gap-8">
           <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ CARRERAS.length }}+</div>
+            <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.loaded ? catalog.careers.length + '+' : '—' }}</div>
             <div class="text-[13px] text-slate-500">carreras</div>
           </div>
           <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ UNIVERSIDADES.length }}</div>
+            <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.loaded ? catalog.universities.length : '—' }}</div>
             <div class="text-[13px] text-slate-500">universidades</div>
           </div>
           <div>

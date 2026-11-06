@@ -11,6 +11,7 @@ const KEY_MENCION = 'vp_paes_mencion'
 const EMPTY_SCORES: PuntajesUsuario = {
   lectora: null,
   matematica: null,
+  matematica2: null,
   historia: null,
   ciencias: null,
   nem: null,

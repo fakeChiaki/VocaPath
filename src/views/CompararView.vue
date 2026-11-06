@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Carrera } from '@/types'
-import { FACTOR_KEYS, FACTOR_LABEL, getCarrera, uniColor } from '@/utils/carreras'
+import { FACTOR_KEYS, FACTOR_LABEL, formatPuntaje, SIN_DATO } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 import { useCareerFilter } from '@/composables/useCareerFilter'
 import { useCompareStore } from '@/stores/compare'
 import CareerSearchBar from '@/components/careers/CareerSearchBar.vue'
 
 const compare = useCompareStore()
+const catalog = useCatalogStore()
 const { search, filtradas } = useCareerFilter()
 
-const seleccionadas = computed<Carrera[]>(() => compare.ids.map((id) => getCarrera(id)).filter((c): c is Carrera => !!c))
+const seleccionadas = computed<Carrera[]>(() => compare.ids.map((id) => catalog.getCarrera(id)).filter((c): c is Carrera => !!c))
 
 interface FilaComparacion {
   label: string
@@ -35,14 +37,14 @@ const filas = computed<FilaComparacion[]>(() => {
 
   const out: FilaComparacion[] = []
 
-  out.push({ label: 'Puntaje de corte 2025', a: ca.ultimo.toFixed(1), b: cb.ultimo.toFixed(1), aColor: NEUTRO, bColor: NEUTRO })
+  out.push({ label: 'Puntaje de corte', a: formatPuntaje(ca.ultimo), b: formatPuntaje(cb.ultimo), aColor: NEUTRO, bColor: NEUTRO })
 
-  out.push({ label: 'Primer seleccionado', a: ca.primero.toFixed(1), b: cb.primero.toFixed(1), aColor: NEUTRO, bColor: NEUTRO })
+  out.push({ label: 'Primer seleccionado', a: formatPuntaje(ca.primero), b: formatPuntaje(cb.primero), aColor: NEUTRO, bColor: NEUTRO })
 
   const [vacantesAColor, vacantesBColor] = colorMayorEsMejor(ca.vacantes, cb.vacantes)
   out.push({ label: 'Vacantes', a: String(ca.vacantes), b: String(cb.vacantes), aColor: vacantesAColor, bColor: vacantesBColor })
 
-  out.push({ label: 'Duración', a: ca.duracion, b: cb.duracion, aColor: NEUTRO, bColor: NEUTRO })
+  out.push({ label: 'Duración', a: ca.duracion ?? SIN_DATO, b: cb.duracion ?? SIN_DATO, aColor: NEUTRO, bColor: NEUTRO })
 
   for (const k of FACTOR_KEYS) {
     if (ca.pond[k] === 0 && cb.pond[k] === 0) continue
@@ -110,11 +112,11 @@ const filas = computed<FilaComparacion[]>(() => {
               >
                 ✕
               </button>
-              <span class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" :style="{ background: uniColor(c.uni) }">
+              <span class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" :style="{ background: catalog.uniColor(c.uni) }">
                 {{ c.uni }}
               </span>
               <div class="mt-3 mb-1.5 font-display text-[19px] font-bold">{{ c.nombre }}</div>
-              <div class="text-[13px] leading-relaxed text-slate-500">{{ c.perfil }}</div>
+              <div v-if="c.perfil" class="text-[13px] leading-relaxed text-slate-500">{{ c.perfil }}</div>
             </div>
           </div>
 

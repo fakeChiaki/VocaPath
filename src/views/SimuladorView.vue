@@ -1,23 +1,22 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  CARRERAS,
-  FACTOR_LABEL,
-  factoresRequeridos,
-  getCarrera,
-  puntajePonderado,
-} from '@/utils/carreras'
+import { etiquetaFactor, factoresRequeridos, formatPuntaje, puntajePonderado, valorFactor } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 import { useScoresStore } from '@/stores/scores'
 
 const route = useRoute()
 const scores = useScoresStore()
+const catalog = useCatalogStore()
 
 const carreraId = ref(typeof route.query.carrera === 'string' ? route.query.carrera : '')
 
-const carrera = computed(() => getCarrera(carreraId.value))
+const carrera = computed(() => catalog.getCarrera(carreraId.value))
 const requeridos = computed(() => (carrera.value ? factoresRequeridos(carrera.value) : []))
-const faltantes = computed(() => requeridos.value.filter((k) => scores.puntajes[k] == null))
+const faltantes = computed(() =>
+  carrera.value ? requeridos.value.filter((k) => valorFactor(carrera.value!, scores.puntajes, k) == null) : [],
+)
+const sinCorte = computed(() => !!carrera.value && carrera.value.ultimo == null)
 const listo = computed(() => !!carrera.value && faltantes.value.length === 0)
 
 const total = computed(() => (listo.value ? puntajePonderado(carrera.value!, scores.puntajes) : 0))
@@ -28,10 +27,10 @@ const desglose = computed(() => {
   if (!listo.value || !carrera.value) return []
   return requeridos.value.map((k) => ({
     key: k,
-    label: FACTOR_LABEL[k],
+    label: etiquetaFactor(carrera.value!, k),
     pond: `${carrera.value!.pond[k]}%`,
-    puntaje: scores.puntajes[k]!,
-    aporte: ((carrera.value!.pond[k] * scores.puntajes[k]!) / 100).toFixed(1),
+    puntaje: valorFactor(carrera.value!, scores.puntajes, k)!,
+    aporte: ((carrera.value!.pond[k] * valorFactor(carrera.value!, scores.puntajes, k)!) / 100).toFixed(1),
   }))
 })
 
@@ -57,12 +56,19 @@ const barCorte = computed(() => `${Math.min(100, ((carrera.value?.ultimo ?? 0) /
         class="mt-2 w-full cursor-pointer rounded-[13px] border-[1.5px] border-line bg-surface px-4 py-3.5 font-display text-[15px] font-semibold text-ink"
       >
         <option value="">— Selecciona una carrera —</option>
-        <option v-for="c in CARRERAS" :key="c.id" :value="c.id">{{ c.nombre }} · {{ c.uni }}</option>
+        <option v-for="c in catalog.careers" :key="c.id" :value="c.id">{{ c.nombre }} · {{ c.uni }}</option>
       </select>
     </div>
 
     <template v-if="carrera">
-      <template v-if="listo">
+      <div v-if="sinCorte" class="rounded-[20px] border-[1.5px] border-slate-200 bg-slate-50 p-7.5 text-center">
+        <div class="mb-2.5 text-[38px]">🔒</div>
+        <div class="mb-1.5 font-display text-[19px] font-bold">Esta carrera no publica su puntaje de corte</div>
+        <div class="text-[14.5px] text-slate-600">
+          Sin ese dato no podemos comparar tu puntaje ponderado con el de <strong>{{ carrera.nombre }}</strong>.
+        </div>
+      </div>
+      <template v-else-if="listo">
         <div
           class="mb-4.5 rounded-[20px] border-[1.5px] p-7"
           :class="admitido ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'"
@@ -85,7 +91,7 @@ const barCorte = computed(() => `${Math.min(100, ((carrera.value?.ultimo ?? 0) /
             </div>
             <div class="flex-1 rounded-[14px] bg-white p-4">
               <div class="text-xs text-slate-500">Puntaje de corte</div>
-              <div class="font-display text-3xl font-extrabold">{{ carrera.ultimo.toFixed(1) }}</div>
+              <div class="font-display text-3xl font-extrabold">{{ formatPuntaje(carrera.ultimo) }}</div>
             </div>
             <div class="flex-1 rounded-[14px] bg-white p-4">
               <div class="text-xs text-slate-500">Diferencia</div>
@@ -137,7 +143,7 @@ const barCorte = computed(() => `${Math.min(100, ((carrera.value?.ultimo ?? 0) /
         <div class="mb-1.5 font-display text-[19px] font-bold text-orange-900">Te faltan puntajes para simular</div>
         <div class="mb-4.5 text-[14.5px] text-orange-900">
           Para <strong>{{ carrera.nombre }}</strong> necesitas registrar:
-          <strong>{{ faltantes.map((k) => FACTOR_LABEL[k]).join(', ') }}</strong
+          <strong>{{ faltantes.map((k) => etiquetaFactor(carrera!, k)).join(', ') }}</strong
           >.
         </div>
         <RouterLink

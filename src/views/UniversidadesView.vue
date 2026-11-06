@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { CARRERAS, UNIVERSIDADES } from '@/utils/carreras'
+import { computed } from 'vue'
+import { useCatalogStore } from '@/stores/catalog'
 
 const router = useRouter()
 
-const universidades = UNIVERSIDADES.map((u) => ({
-  ...u,
-  count: CARRERAS.filter((c) => c.uni === u.name).length,
-}))
+const catalog = useCatalogStore()
 
-function abrir(nombre: string) {
-  router.push(`/universidades/${nombre}`)
+const universidades = computed(() =>
+  catalog.universities.map((u) => ({
+    ...u,
+    count: catalog.careers.filter((c) => c.uniId === u.id).length,
+  })),
+)
+
+function abrir(id: string) {
+  router.push(`/universidades/${id}`)
 }
 </script>
 
@@ -24,9 +29,9 @@ function abrir(nombre: string) {
     <div class="grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
       <div
         v-for="u in universidades"
-        :key="u.name"
+        :key="u.id"
         class="cursor-pointer rounded-[20px] border border-line bg-white p-6.5 transition-all duration-150 hover:-translate-y-0.75 hover:border-blue-200 hover:shadow-xl hover:shadow-slate-900/10"
-        @click="abrir(u.name)"
+        @click="abrir(u.id)"
       >
         <span
           class="flex size-14.5 items-center justify-center rounded-2xl font-display text-lg font-extrabold text-white"

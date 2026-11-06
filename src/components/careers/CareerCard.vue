@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import type { Carrera } from '@/types'
-import { AREA_LABEL, uniColor } from '@/utils/carreras'
+import { formatPuntaje } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
 
 const props = defineProps<{ carrera: Carrera }>()
 
 const router = useRouter()
 const favorites = useFavoritesStore()
+const catalog = useCatalogStore()
 
 function abrir() {
   router.push(`/carreras/${props.carrera.id}`)
@@ -27,7 +29,7 @@ function toggleFav(e: Event) {
     <div class="flex items-start justify-between gap-2.5">
       <span
         class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
-        :style="{ background: uniColor(carrera.uni) }"
+        :style="{ background: catalog.uniColor(carrera.uni) }"
       >
         {{ carrera.uni }}
       </span>
@@ -41,11 +43,11 @@ function toggleFav(e: Event) {
       </button>
     </div>
     <div class="mt-3.5 mb-1 font-display text-lg leading-tight font-bold">{{ carrera.nombre }}</div>
-    <div class="mb-4.5 text-[13px] text-slate-500">{{ AREA_LABEL[carrera.area] }}</div>
+    <div class="mb-4.5 text-[13px] text-slate-500">{{ carrera.areaLabel }}</div>
     <div class="flex gap-2.5">
       <div class="flex-1 rounded-[11px] bg-surface px-3 py-2.5">
-        <div class="text-[11px] text-slate-500">Corte 2025</div>
-        <div class="font-display text-base font-bold text-blue-600">{{ carrera.ultimo.toFixed(1) }}</div>
+        <div class="text-[11px] text-slate-500">Corte</div>
+        <div class="font-display text-base font-bold text-blue-600">{{ formatPuntaje(carrera.ultimo, '—') }}</div>
       </div>
       <div class="flex-1 rounded-[11px] bg-surface px-3 py-2.5">
         <div class="text-[11px] text-slate-500">Vacantes</div>
