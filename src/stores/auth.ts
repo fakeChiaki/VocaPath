@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api, refreshAccessToken } from '@/api/client'
 import { setAccessToken } from '@/api/session'
+import { useFavoritesStore } from '@/stores/favorites'
 
 interface AuthUser {
   id: string
@@ -49,6 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
   function clear() {
     setAccessToken(null)
     user.value = null
+    useFavoritesStore().reset()
   }
 
   async function logout() {

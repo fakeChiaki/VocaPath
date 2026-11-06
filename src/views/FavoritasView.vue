@@ -19,7 +19,7 @@ const favCareers = computed<Carrera[]>(() =>
   <section class="animate-vp-fade">
     <div class="mb-6">
       <h1 class="mb-2 font-display text-4xl font-bold tracking-tight">♥ Mis carreras favoritas</h1>
-      <p class="text-base text-slate-500">Tus carreras guardadas. Se almacenan en el caché de tu navegador.</p>
+      <p class="text-base text-slate-500">Tus carreras guardadas. Se guardan en tu cuenta.</p>
     </div>
 
     <div

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import { useCatalogStore } from '@/stores/catalog'
+import { useFavoritesStore } from '@/stores/favorites'
 
 const catalog = useCatalogStore()
+const favorites = useFavoritesStore()
 </script>
 
 <template>
@@ -20,6 +22,19 @@ const catalog = useCatalogStore()
           @click="catalog.load()"
         >
           Reintentar
+        </button>
+      </div>
+      <div
+        v-if="favorites.error"
+        class="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
+        role="alert"
+      >
+        <span>{{ favorites.error }}</span>
+        <button
+          class="cursor-pointer rounded-[10px] border-none bg-rose-600 px-3.5 py-2 text-[13px] font-semibold text-white"
+          @click="favorites.error = ''"
+        >
+          Cerrar
         </button>
       </div>
       <RouterView />
