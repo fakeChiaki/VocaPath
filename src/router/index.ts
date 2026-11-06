@@ -1,4 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    public?: boolean
+    guestOnly?: boolean
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -6,7 +14,9 @@ const router = createRouter({
     return { top: 0 }
   },
   routes: [
-    { path: '/', name: 'home', component: () => import('@/views/HomeView.vue') },
+    { path: '/', name: 'home', component: () => import('@/views/HomeView.vue'), meta: { public: true } },
+    { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { guestOnly: true } },
+    { path: '/registro', name: 'registro', component: () => import('@/views/RegisterView.vue'), meta: { guestOnly: true } },
     { path: '/fechas', name: 'fechas', component: () => import('@/views/FechasPaesView.vue') },
     { path: '/carreras', name: 'carreras', component: () => import('@/views/CarrerasView.vue') },
     { path: '/carreras/:id', name: 'carrera-detalle', component: () => import('@/views/CarreraDetalleView.vue') },
@@ -29,6 +39,15 @@ const router = createRouter({
     { path: '/simulador', name: 'simulador', component: () => import('@/views/SimuladorView.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+})
+
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
+  await auth.init()
+
+  if (to.meta.guestOnly) return auth.isAuthenticated ? '/' : true
+  if (to.meta.public || auth.isAuthenticated) return true
+  return { name: 'login', query: { redirect: to.fullPath } }
 })
 
 export default router

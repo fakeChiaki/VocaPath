@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { useFavoritesStore } from '@/stores/favorites'
 
+const router = useRouter()
+const auth = useAuthStore()
 const favorites = useFavoritesStore()
+
+async function cerrarSesion() {
+  await auth.logout()
+  router.push('/login')
+}
 
 const items = [
   { label: 'Fechas PAES', to: '/fechas' },
@@ -27,7 +35,21 @@ const items = [
         </span>
         <span class="font-display text-xl font-bold tracking-tight">Voca<span class="text-blue-600">Path</span></span>
       </RouterLink>
-      <nav class="ml-auto flex flex-wrap items-center justify-end gap-1">
+      <nav v-if="!auth.isAuthenticated" class="ml-auto flex items-center gap-1">
+        <RouterLink
+          to="/login"
+          class="rounded-[10px] px-3 py-2 text-[13.5px] font-semibold text-slate-600 transition-colors hover:bg-slate-100"
+        >
+          Iniciar sesión
+        </RouterLink>
+        <RouterLink
+          to="/registro"
+          class="rounded-[10px] bg-blue-600 px-3.5 py-2 text-[13.5px] font-semibold text-white"
+        >
+          Crear cuenta
+        </RouterLink>
+      </nav>
+      <nav v-else class="ml-auto flex flex-wrap items-center justify-end gap-1">
         <RouterLink
           v-for="item in items"
           :key="item.to"
@@ -44,6 +66,13 @@ const items = [
         >
           <span class="text-sm">♥</span> {{ favorites.count }}
         </RouterLink>
+        <button
+          class="ml-1 cursor-pointer rounded-[10px] border-none bg-transparent px-3 py-2 text-[13.5px] font-semibold text-slate-500 hover:bg-slate-100"
+          :title="auth.user?.email"
+          @click="cerrarSesion"
+        >
+          Cerrar sesión
+        </button>
       </nav>
     </div>
   </header>
