@@ -3,7 +3,7 @@ import CareerSearchBar from '@/components/careers/CareerSearchBar.vue'
 import CareerCard from '@/components/careers/CareerCard.vue'
 import { useCareerFilter } from '@/composables/useCareerFilter'
 
-const { search, filtradas } = useCareerFilter()
+const { search, filtered } = useCareerFilter()
 </script>
 
 <template>
@@ -14,10 +14,10 @@ const { search, filtradas } = useCareerFilter()
     </div>
 
     <CareerSearchBar v-model="search" class="mb-2" />
-    <div class="mb-4.5 text-[13px] text-slate-400">{{ filtradas.length }} carreras encontradas</div>
+    <div class="mb-4.5 text-[13px] text-slate-400">{{ filtered.length }} carreras encontradas</div>
 
     <div class="grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
-      <CareerCard v-for="c in filtradas" :key="c.id" :carrera="c" />
+      <CareerCard v-for="c in filtered" :key="c.id" :career="c" />
     </div>
   </section>
 </template>

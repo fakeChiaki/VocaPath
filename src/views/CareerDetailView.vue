@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { factoresPonderados, formatPuntaje, SIN_DATO } from '@/utils/carreras'
+import { areaName, weightedFactors, formatScore, NO_DATA } from '@/utils/careers'
 import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useCompareStore } from '@/stores/compare'
@@ -12,49 +12,49 @@ const favorites = useFavoritesStore()
 const compare = useCompareStore()
 const catalog = useCatalogStore()
 
-const carrera = computed(() => catalog.getCarrera(route.params.id as string))
+const career = computed(() => catalog.getCareer(route.params.id as string))
 
 const meta = computed(() => {
-  const c = carrera.value
+  const c = career.value
   if (!c) return []
   return [
-    { l: 'Título profesional', v: c.titulo ?? SIN_DATO },
-    { l: 'Grado académico', v: c.grado ?? SIN_DATO },
-    { l: 'Duración', v: c.duracion ?? SIN_DATO },
-    { l: 'Código', v: c.codigo ?? SIN_DATO },
-    { l: 'Régimen de estudios', v: c.regimen ?? SIN_DATO },
+    { l: 'Título profesional', v: c.title ?? NO_DATA },
+    { l: 'Grado académico', v: c.degree ?? NO_DATA },
+    { l: 'Duración', v: c.duration ?? NO_DATA },
+    { l: 'Código', v: c.externalCode ?? NO_DATA },
+    { l: 'Régimen de estudios', v: c.regimen ?? NO_DATA },
   ]
 })
 
-const pondRows = computed(() => (carrera.value ? factoresPonderados(carrera.value) : []))
+const weightRows = computed(() => (career.value ? weightedFactors(career.value) : []))
 
-const esFavorita = computed(() => (carrera.value ? favorites.has(carrera.value.id) : false))
+const isFavorite = computed(() => (career.value ? favorites.has(career.value.id) : false))
 
-function volver() {
+function goBack() {
   router.push('/carreras')
 }
 
 function toggleFav() {
-  if (carrera.value) favorites.toggle(carrera.value.id)
+  if (career.value) favorites.toggle(career.value.id)
 }
 
-function irComparar() {
-  if (!carrera.value) return
-  compare.toggle(carrera.value.id)
+function goToCompare() {
+  if (!career.value) return
+  compare.toggle(career.value.id)
   router.push('/comparar')
 }
 
-function irSimulador() {
-  if (!carrera.value) return
-  router.push({ path: '/simulador', query: { carrera: carrera.value.id } })
+function goToSimulator() {
+  if (!career.value) return
+  router.push({ path: '/simulador', query: { career: career.value.id } })
 }
 </script>
 
 <template>
-  <section v-if="carrera" class="animate-vp-fade">
+  <section v-if="career" class="animate-vp-fade">
     <button
       class="mb-4.5 cursor-pointer border-none bg-transparent p-0 text-sm font-semibold text-slate-500"
-      @click="volver"
+      @click="goBack"
     >
       ← Volver a carreras
     </button>
@@ -65,12 +65,12 @@ function irSimulador() {
           class="rounded-[22px] bg-gradient-to-br from-blue-600 to-sky-500 px-8 py-7.5 text-white shadow-xl shadow-blue-600/30"
         >
           <span class="rounded-full bg-white/20 px-2.75 py-1 text-[11px] font-bold">
-            {{ carrera.uni }} · {{ carrera.areaLabel }}
+            {{ career.universityName }} · {{ areaName(career) }}
           </span>
           <h1 class="mt-3.5 mb-1 font-display text-[34px] leading-tight font-extrabold tracking-tight">
-            {{ carrera.nombre }}
+            {{ career.name }}
           </h1>
-          <div v-if="carrera.perfil" class="text-[15px] opacity-90">{{ carrera.perfil }}</div>
+          <div v-if="career.profile" class="text-[15px] opacity-90">{{ career.profile }}</div>
         </div>
 
         <h3 class="mt-7 mb-3.5 font-display text-lg font-bold">Información de la carrera</h3>
@@ -86,8 +86,8 @@ function irSimulador() {
         </div>
 
         <a
-          v-if="carrera.malla"
-          :href="carrera.malla"
+          v-if="career.curriculumUrl"
+          :href="career.curriculumUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="mt-3.5 inline-flex items-center gap-2 rounded-[13px] border-[1.5px] border-[#cdd9ea] bg-white px-4.5 py-3 font-display text-[14.5px] font-semibold text-blue-600"
@@ -97,7 +97,7 @@ function irSimulador() {
 
         <h3 class="mt-7 mb-3.5 font-display text-lg font-bold">Ponderaciones de admisión</h3>
         <div class="rounded-[18px] border border-line bg-white p-5.5">
-          <div v-for="r in pondRows" :key="r.key" class="mb-4 last:mb-0">
+          <div v-for="r in weightRows" :key="r.key" class="mb-4 last:mb-0">
             <div class="mb-1.5 flex justify-between text-sm">
               <span class="font-semibold">{{ r.label }}</span>
               <span class="font-display font-bold text-blue-600">{{ r.value }}%</span>
@@ -120,43 +120,43 @@ function irSimulador() {
               <div class="text-xs text-blue-500">Puntaje primer seleccionado</div>
               <div
                 class="font-display font-extrabold text-blue-700"
-                :class="carrera.primero == null ? 'py-1.5 text-lg' : 'text-[28px]'"
+                :class="career.firstSelectedScore == null ? 'py-1.5 text-lg' : 'text-[28px]'"
               >
-                {{ formatPuntaje(carrera.primero) }}
+                {{ formatScore(career.firstSelectedScore) }}
               </div>
             </div>
             <div class="rounded-[14px] bg-surface p-4">
               <div class="text-xs text-slate-500">Puntaje último seleccionado (corte)</div>
-              <div class="font-display font-extrabold" :class="carrera.ultimo == null ? 'py-1.5 text-lg' : 'text-[28px]'">
-                {{ formatPuntaje(carrera.ultimo) }}
+              <div class="font-display font-extrabold" :class="career.cutoffScore == null ? 'py-1.5 text-lg' : 'text-[28px]'">
+                {{ formatScore(career.cutoffScore) }}
               </div>
             </div>
             <div class="rounded-[14px] bg-surface p-4">
               <div class="text-xs text-slate-500">Vacantes</div>
-              <div class="font-display text-[28px] font-extrabold">{{ carrera.vacantes }}</div>
+              <div class="font-display text-[28px] font-extrabold">{{ career.vacantes }}</div>
             </div>
           </div>
           <div class="mt-4.5 grid gap-2.5">
             <button
               class="cursor-pointer rounded-[13px] border-[1.5px] px-4 py-3.25 font-display text-[15px] font-semibold"
               :class="
-                esFavorita
+                isFavorite
                   ? 'border-rose-200 bg-[#fff1f3] text-rose-600'
                   : 'border-[#cdd9ea] bg-white text-slate-700'
               "
               @click="toggleFav"
             >
-              {{ esFavorita ? '♥  En favoritas' : '♡  Agregar a favoritas' }}
+              {{ isFavorite ? '♥  En favoritas' : '♡  Agregar a favoritas' }}
             </button>
             <button
               class="cursor-pointer rounded-[13px] border-[1.5px] border-[#cdd9ea] bg-white px-4 py-3.25 font-display text-[15px] font-semibold text-slate-700"
-              @click="irComparar"
+              @click="goToCompare"
             >
               ⚖️ Comparar carrera
             </button>
             <button
               class="cursor-pointer rounded-[13px] border-none bg-gradient-to-br from-blue-600 to-sky-500 px-4 py-3.25 font-display text-[15px] font-semibold text-white"
-              @click="irSimulador"
+              @click="goToSimulator"
             >
               🚀 Simular postulación
             </button>
@@ -171,7 +171,7 @@ function irSimulador() {
       <p class="mb-4 text-sm text-slate-500">No encontramos esa carrera.</p>
       <button
         class="cursor-pointer rounded-[13px] border-none bg-gradient-to-br from-blue-600 to-sky-500 px-6 py-3 font-display text-[15px] font-semibold text-white"
-        @click="volver"
+        @click="goBack"
       >
         Volver a carreras
       </button>

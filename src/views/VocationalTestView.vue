@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { Carrera, PreguntaVocacional } from '@/types'
+import type { VocationalQuestion } from '@/types'
+import type { Career } from '@/types/api'
 import preguntasData from '@/data/test-vocacional.json'
-import { AREA_LABEL } from '@/utils/carreras'
+import { AREA_LABELS, areaName } from '@/utils/careers'
 import { useCatalogStore } from '@/stores/catalog'
 
 const catalog = useCatalogStore()
-const preguntas = preguntasData as PreguntaVocacional[]
+const preguntas = preguntasData as VocationalQuestion[]
 
 const indice = ref(0)
 const respuestas = ref<Record<number, number>>({})
@@ -52,8 +53,8 @@ function reiniciar() {
   window.scrollTo({ top: 0 })
 }
 
-interface Recomendacion {
-  carrera: Carrera
+interface Recommendation {
+  career: Career
   reason: string
 }
 
@@ -68,14 +69,14 @@ const topAreas = computed<string[]>(() => {
   return Object.keys(tally).sort((a, b) => tally[b]! - tally[a]!).slice(0, 2)
 })
 
-const topAreaLabel = computed(() => topAreas.value.map((a) => AREA_LABEL[a] ?? a).join(' y '))
+const topAreaLabel = computed(() => topAreas.value.map((a) => AREA_LABELS[a] ?? a).join(' y '))
 
-const recomendaciones = computed<Recomendacion[]>(() => {
-  return catalog.careers.filter((c) => c.area != null && topAreas.value.includes(c.area))
+const recommendations = computed<Recommendation[]>(() => {
+  return catalog.careers.filter((c) => c.areaCode != null && topAreas.value.includes(c.areaCode))
     .slice(0, 4)
-    .map((carrera) => ({
-      carrera,
-      reason: `Encaja con tu interés en ${carrera.areaLabel.toLowerCase()}${carrera.perfil ? `: ${carrera.perfil.split('.')[0]}` : ''}.`,
+    .map((career) => ({
+      career,
+      reason: `Encaja con tu interés en ${areaName(career).toLowerCase()}${career.profile ? `: ${career.profile.split('.')[0]}` : ''}.`,
     }))
 })
 </script>
@@ -147,22 +148,22 @@ const recomendaciones = computed<Recomendacion[]>(() => {
 
       <div class="flex flex-col gap-3.5">
         <RouterLink
-          v-for="r in recomendaciones"
-          :key="r.carrera.id"
-          :to="`/carreras/${r.carrera.id}`"
+          v-for="r in recommendations"
+          :key="r.career.id"
+          :to="`/carreras/${r.career.id}`"
           class="flex items-start gap-4.5 rounded-[18px] border border-line bg-white p-5.5 transition-all duration-150 hover:-translate-y-0.75 hover:border-blue-200 hover:shadow-xl hover:shadow-slate-900/10"
         >
           <span
             class="flex size-11.5 shrink-0 items-center justify-center rounded-[13px] font-display text-[13px] font-extrabold text-white"
-            :style="{ background: catalog.uniColor(r.carrera.uni) }"
+            :style="{ background: catalog.universityColor(r.career.universityName) }"
           >
-            {{ r.carrera.uni }}
+            {{ r.career.universityName }}
           </span>
           <div class="flex-1">
             <div class="flex flex-wrap items-center gap-2.5">
-              <span class="font-display text-lg font-bold">{{ r.carrera.nombre }}</span>
+              <span class="font-display text-lg font-bold">{{ r.career.name }}</span>
               <span class="rounded-full bg-[#eff6ff] px-2.25 py-0.75 text-[11px] font-semibold text-blue-600">
-                {{ r.carrera.areaLabel }}
+                {{ areaName(r.career) }}
               </span>
             </div>
             <div class="mt-1.5 text-sm leading-relaxed text-slate-500">{{ r.reason }}</div>

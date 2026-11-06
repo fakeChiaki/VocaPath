@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Carrera } from '@/types'
+import type { Career } from '@/types/api'
 import CareerCard from '@/components/careers/CareerCard.vue'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useCatalogStore } from '@/stores/catalog'
@@ -10,8 +10,8 @@ const router = useRouter()
 const favorites = useFavoritesStore()
 const catalog = useCatalogStore()
 
-const favCareers = computed<Carrera[]>(() =>
-  favorites.ids.map((id) => catalog.getCarrera(id)).filter((c): c is Carrera => !!c),
+const favCareers = computed<Career[]>(() =>
+  favorites.ids.map((id) => catalog.getCareer(id)).filter((c): c is Career => !!c),
 )
 </script>
 
@@ -38,7 +38,7 @@ const favCareers = computed<Carrera[]>(() =>
     </div>
 
     <div v-else class="grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
-      <CareerCard v-for="c in favCareers" :key="c.id" :carrera="c" />
+      <CareerCard v-for="c in favCareers" :key="c.id" :career="c" />
     </div>
   </section>
 </template>

@@ -1,13 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api, errorMessage } from '@/api/client'
-import { toCarrera, toUniversidad } from '@/api/catalog'
-import type { Carrera, Universidad } from '@/types'
-import type { ApiCareer, ApiUniversity } from '@/types/api'
+import type { Career, University } from '@/types/api'
 
 export const useCatalogStore = defineStore('catalog', () => {
-  const careers = ref<Carrera[]>([])
-  const universities = ref<Universidad[]>([])
+  const careers = ref<Career[]>([])
+  const universities = ref<University[]>([])
   const loaded = ref(false)
   const error = ref('')
   let loading: Promise<void> | null = null
@@ -16,9 +14,9 @@ export const useCatalogStore = defineStore('catalog', () => {
     if (loaded.value) return Promise.resolve()
     loading ??= (async () => {
       try {
-        const [c, u] = await Promise.all([api.get<ApiCareer[]>('/careers'), api.get<ApiUniversity[]>('/universities')])
-        careers.value = c.data.map(toCarrera).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-        universities.value = u.data.map(toUniversidad).sort((a, b) => a.name.localeCompare(b.name, 'es'))
+        const [c, u] = await Promise.all([api.get<Career[]>('/careers'), api.get<University[]>('/universities')])
+        careers.value = c.data.sort((a, b) => a.name.localeCompare(b.name, 'es'))
+        universities.value = u.data.sort((a, b) => a.name.localeCompare(b.name, 'es'))
         loaded.value = true
         error.value = ''
       } catch (e) {
@@ -30,17 +28,17 @@ export const useCatalogStore = defineStore('catalog', () => {
     return loading
   }
 
-  function getCarrera(id: string | null | undefined) {
+  function getCareer(id: string | null | undefined) {
     return careers.value.find((c) => c.id === id)
   }
 
-  function getUniversidad(id: string | null | undefined) {
+  function getUniversity(id: string | null | undefined) {
     return universities.value.find((u) => u.id === id)
   }
 
-  function uniColor(name: string) {
+  function universityColor(name: string) {
     return universities.value.find((u) => u.name === name)?.color ?? '#2563eb'
   }
 
-  return { careers, universities, loaded, error, load, getCarrera, getUniversidad, uniColor }
+  return { careers, universities, loaded, error, load, getCareer, getUniversity, universityColor }
 })

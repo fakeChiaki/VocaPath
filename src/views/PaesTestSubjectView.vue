@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { MateriaPaes, MencionCiencias, PreguntaPaes, RespuestasPaes } from '@/types'
-import { MATERIAS_PAES, PRUEBAS_PAES, puntajePaes } from '@/utils/carreras'
+import type { PaesSubject, ScienceMention, PaesQuestion, PaesAnswers } from '@/types'
+import { PAES_SUBJECTS, PAES_TESTS, paesScore } from '@/utils/careers'
 import { useScoresStore } from '@/stores/scores'
 import CacheWarning from '@/components/layout/CacheWarning.vue'
 
@@ -10,17 +10,17 @@ const route = useRoute()
 const router = useRouter()
 const scores = useScoresStore()
 
-const materia = computed(() => route.params.materia as MateriaPaes)
-const prueba = computed(() => PRUEBAS_PAES[materia.value])
+const materia = computed(() => route.params.subject as PaesSubject)
+const prueba = computed(() => PAES_TESTS[materia.value])
 
-const mencion = computed<MencionCiencias | null>(() => {
+const mencion = computed<ScienceMention | null>(() => {
   const m = route.query.mencion
   const menciones = prueba.value?.menciones
-  return typeof m === 'string' && menciones && m in menciones ? (m as MencionCiencias) : null
+  return typeof m === 'string' && menciones && m in menciones ? (m as ScienceMention) : null
 })
 const requiereMencion = computed(() => !!prueba.value?.menciones && !mencion.value)
 
-const preguntas = computed<PreguntaPaes[]>(() => {
+const preguntas = computed<PaesQuestion[]>(() => {
   const p = prueba.value
   if (!p) return []
   if (p.menciones) return mencion.value ? p.menciones[mencion.value].qs : []
@@ -38,11 +38,11 @@ const icono = computed(() => {
   return p?.icon ?? ''
 })
 
-const respuestas = ref<RespuestasPaes>({})
+const respuestas = ref<PaesAnswers>({})
 const finalizada = ref(false)
 
 function iniciar() {
-  if (!MATERIAS_PAES.includes(materia.value)) {
+  if (!PAES_SUBJECTS.includes(materia.value)) {
     router.replace('/prueba-paes')
     return
   }
@@ -64,16 +64,16 @@ function iniciar() {
   }
 }
 
-watch(() => [route.params.materia, route.query.revisar, route.query.mencion], iniciar, { immediate: true })
+watch(() => [route.params.subject, route.query.revisar, route.query.mencion], iniciar, { immediate: true })
 
-function elegirMencion(m: MencionCiencias) {
+function elegirMencion(m: ScienceMention) {
   router.push({ query: { mencion: m } })
 }
 
 const total = computed(() => preguntas.value.length)
 const respondidas = computed(() => Object.keys(respuestas.value).length)
 const correctas = computed(() => preguntas.value.filter((q, i) => respuestas.value[i] === q.c).length)
-const puntaje = computed(() => puntajePaes(correctas.value, total.value))
+const puntaje = computed(() => paesScore(correctas.value, total.value))
 const puedeEnviar = computed(() => total.value > 0 && respondidas.value === total.value)
 
 function elegir(pregunta: number, opcion: number) {

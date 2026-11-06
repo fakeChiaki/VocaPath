@@ -7,14 +7,14 @@ const router = useRouter()
 
 const catalog = useCatalogStore()
 
-const universidades = computed(() =>
+const universities = computed(() =>
   catalog.universities.map((u) => ({
     ...u,
-    count: catalog.careers.filter((c) => c.uniId === u.id).length,
+    count: catalog.careers.filter((c) => c.universityId === u.id).length,
   })),
 )
 
-function abrir(id: string) {
+function openUniversity(id: string) {
   router.push(`/universidades/${id}`)
 }
 </script>
@@ -28,10 +28,10 @@ function abrir(id: string) {
 
     <div class="grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
       <div
-        v-for="u in universidades"
+        v-for="u in universities"
         :key="u.id"
         class="cursor-pointer rounded-[20px] border border-line bg-white p-6.5 transition-all duration-150 hover:-translate-y-0.75 hover:border-blue-200 hover:shadow-xl hover:shadow-slate-900/10"
-        @click="abrir(u.id)"
+        @click="openUniversity(u.id)"
       >
         <span
           class="flex size-14.5 items-center justify-center rounded-2xl font-display text-lg font-extrabold text-white"
@@ -39,7 +39,7 @@ function abrir(id: string) {
         >
           {{ u.name }}
         </span>
-        <div class="mt-4.5 mb-1 font-display text-xl font-bold">{{ u.full }}</div>
+        <div class="mt-4.5 mb-1 font-display text-xl font-bold">{{ u.fullName }}</div>
         <div class="mb-4.5 text-[13.5px] text-slate-500">📍 {{ u.city }}</div>
         <div
           class="inline-flex items-center gap-2 rounded-full bg-[#eff6ff] px-3.5 py-1.75 text-[13px] font-semibold text-blue-600"

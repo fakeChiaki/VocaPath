@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api, errorMessage } from '@/api/client'
-import type { ApiCareer } from '@/types/api'
+import type { Career } from '@/types/api'
 
 const LEGACY_KEY = 'vp_fav'
 
@@ -15,7 +15,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
   async function load() {
     if (loaded.value) return
     try {
-      const { data } = await api.get<ApiCareer[]>('/favorites')
+      const { data } = await api.get<Career[]>('/favorites')
       ids.value = data.map((c) => c.id)
       loaded.value = true
       localStorage.removeItem(LEGACY_KEY)

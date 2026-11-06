@@ -7,12 +7,12 @@ const router = useRouter()
 const auth = useAuthStore()
 const favorites = useFavoritesStore()
 
-async function cerrarSesion() {
+async function signOut() {
   await auth.logout()
   router.push('/login')
 }
 
-const items = [
+const navItems = [
   { label: 'Fechas PAES', to: '/fechas' },
   { label: 'Carreras', to: '/carreras' },
   { label: 'Universidades', to: '/universidades' },
@@ -51,7 +51,7 @@ const items = [
       </nav>
       <nav v-else class="ml-auto flex flex-wrap items-center justify-end gap-1">
         <RouterLink
-          v-for="item in items"
+          v-for="item in navItems"
           :key="item.to"
           :to="item.to"
           class="rounded-[10px] px-3 py-2 text-[13.5px] font-semibold whitespace-nowrap text-slate-600 transition-colors hover:bg-slate-100"
@@ -69,7 +69,7 @@ const items = [
         <button
           class="ml-1 cursor-pointer rounded-[10px] border-none bg-transparent px-3 py-2 text-[13.5px] font-semibold text-slate-500 hover:bg-slate-100"
           :title="auth.user?.email"
-          @click="cerrarSesion"
+          @click="signOut"
         >
           Cerrar sesión
         </button>

@@ -11,21 +11,21 @@ const auth = useAuthStore()
 const email = ref('')
 const password = ref('')
 const error = ref('')
-const cargando = ref(false)
+const loading = ref(false)
 
-const recienRegistrado = route.query.registrado != null
+const justRegistered = route.query.registered != null
 
-async function enviar() {
+async function submit() {
   error.value = ''
-  cargando.value = true
+  loading.value = true
   try {
     await auth.login(email.value.trim(), password.value)
-    const destino = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-    router.push(destino.startsWith('/') && !destino.startsWith('//') ? destino : '/')
+    const destination = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.push(destination.startsWith('/') && !destination.startsWith('//') ? destination : '/')
   } catch (e) {
     error.value = errorMessage(e)
   } finally {
-    cargando.value = false
+    loading.value = false
   }
 }
 </script>
@@ -37,8 +37,8 @@ async function enviar() {
       <p class="mt-1.5 text-sm text-slate-500">Accede a tus puntajes, favoritas y resultados.</p>
     </div>
 
-    <form class="rounded-[22px] border border-line bg-white p-8 shadow-[0_10px_28px_rgba(15,23,42,0.06)]" @submit.prevent="enviar">
-      <p v-if="recienRegistrado" class="mb-4 rounded-[12px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+    <form class="rounded-[22px] border border-line bg-white p-8 shadow-[0_10px_28px_rgba(15,23,42,0.06)]" @submit.prevent="submit">
+      <p v-if="justRegistered" class="mb-4 rounded-[12px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
         Cuenta creada. Ya puedes iniciar sesión.
       </p>
 
@@ -66,10 +66,10 @@ async function enviar() {
 
       <button
         type="submit"
-        :disabled="cargando"
+        :disabled="loading"
         class="w-full cursor-pointer rounded-[13px] border-none bg-gradient-to-br from-blue-600 to-sky-500 px-4 py-3.25 font-display text-[15px] font-semibold text-white disabled:opacity-60"
       >
-        {{ cargando ? 'Ingresando…' : 'Iniciar sesión' }}
+        {{ loading ? 'Ingresando…' : 'Iniciar sesión' }}
       </button>
 
       <p class="mt-5 text-center text-sm text-slate-500">

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { FactorPuntaje, MateriaPaes } from '@/types'
-import { FACTOR_LABEL, MATERIAS_PAES } from '@/utils/carreras'
+import type { ScoreFactor, PaesSubject } from '@/types'
+import { FACTOR_LABELS, PAES_SUBJECTS } from '@/utils/careers'
 import { useScoresStore } from '@/stores/scores'
 import CacheWarning from '@/components/layout/CacheWarning.vue'
 
 const scores = useScoresStore()
 
-const materias: { key: FactorPuntaje; icon: string }[] = [
+const materias: { key: ScoreFactor; icon: string }[] = [
   { key: 'lectora', icon: '📖' },
   { key: 'matematica', icon: '📐' },
   { key: 'matematica2', icon: '➗' },
@@ -16,11 +16,11 @@ const materias: { key: FactorPuntaje; icon: string }[] = [
   { key: 'ranking', icon: '📈' },
 ]
 
-function esMateriaPaes(key: FactorPuntaje): key is MateriaPaes {
-  return (MATERIAS_PAES as string[]).includes(key)
+function esMateriaPaes(key: ScoreFactor): key is PaesSubject {
+  return (PAES_SUBJECTS as string[]).includes(key)
 }
 
-function onChange(key: FactorPuntaje, e: Event) {
+function onChange(key: ScoreFactor, e: Event) {
   const valor = (e.target as HTMLInputElement).value
   scores.setPuntaje(key, valor === '' ? null : Number(valor))
 }
@@ -44,7 +44,7 @@ function onChange(key: FactorPuntaje, e: Event) {
       <div v-for="m in materias" :key="m.key" class="rounded-[18px] border border-line bg-white px-5.5 py-5">
         <div class="mb-4 flex items-center gap-3">
           <span class="flex size-10.5 items-center justify-center rounded-xl bg-surface text-[21px]">{{ m.icon }}</span>
-          <span class="font-display text-base font-bold">{{ FACTOR_LABEL[m.key] }}</span>
+          <span class="font-display text-base font-bold">{{ FACTOR_LABELS[m.key] }}</span>
         </div>
         <div class="flex items-center gap-2.5">
           <div class="flex flex-1 items-center rounded-xl border-[1.5px] border-line bg-surface px-3.5">
@@ -61,7 +61,7 @@ function onChange(key: FactorPuntaje, e: Event) {
           <button
             v-if="scores.puntajes[m.key] != null"
             class="h-12 w-11.5 cursor-pointer rounded-xl border-[1.5px] border-rose-200 bg-[#fff1f3] text-base text-rose-600"
-            :aria-label="`Borrar puntaje de ${FACTOR_LABEL[m.key]}`"
+            :aria-label="`Borrar puntaje de ${FACTOR_LABELS[m.key]}`"
             @click="scores.borrarPuntaje(m.key)"
           >
             🗑

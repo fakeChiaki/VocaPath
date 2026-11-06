@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MATERIAS_PAES } from '@/utils/carreras'
+import { PAES_SUBJECTS } from '@/utils/careers'
 import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
 
@@ -93,7 +93,7 @@ const features = [
             <div class="text-[13px] text-slate-500">universidades</div>
           </div>
           <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ MATERIAS_PAES.length }}</div>
+            <div class="font-display text-[26px] font-bold text-blue-600">{{ PAES_SUBJECTS.length }}</div>
             <div class="text-[13px] text-slate-500">pruebas PAES</div>
           </div>
         </div>

@@ -1,68 +1,39 @@
-export type MateriaPaes = 'lectora' | 'matematica' | 'historia' | 'ciencias'
+export type PaesSubject = 'lectora' | 'matematica' | 'historia' | 'ciencias'
 
-export type FactorPuntaje = MateriaPaes | 'matematica2' | 'nem' | 'ranking'
+export type ScoreFactor = PaesSubject | 'matematica2' | 'nem' | 'ranking'
 
-export interface Carrera {
-  id: string
-  nombre: string
-  uni: string
-  uniId: string
-  titulo: string | null
-  grado: string | null
-  duracion: string | null
-  codigo: string | null
-  regimen: string | null
-  area: string | null
-  areaLabel: string
-  pond: Record<FactorPuntaje, number>
-  historiaOCiencias: boolean
-  vacantes: number
-  primero: number | null
-  ultimo: number | null
-  perfil: string | null
-  malla: string | null
-}
-
-export interface Universidad {
-  id: string
-  name: string
-  full: string
-  city: string
-  color: string
-}
-
-export interface OpcionVocacional {
+export interface VocationalOption {
   label: string
   area: string
 }
 
-export interface PreguntaVocacional {
+export interface VocationalQuestion {
   id: string
   text: string
-  opts: OpcionVocacional[]
+  opts: VocationalOption[]
 }
 
-export interface PreguntaPaes {
+export interface PaesQuestion {
   t: string
   o: string[]
   c: number
 }
 
-export type MencionCiencias = 'biologia' | 'fisica' | 'quimica'
+export type ScienceMention = 'biologia' | 'fisica' | 'quimica'
 
-export interface MencionPaes {
+export interface PaesMention {
   label: string
   icon: string
-  qs: PreguntaPaes[]
+  qs: PaesQuestion[]
 }
 
-export interface PruebaPaes {
+export interface PaesTest {
   label: string
   icon: string
-  qs?: PreguntaPaes[]
-  menciones?: Record<MencionCiencias, MencionPaes>
+  qs?: PaesQuestion[]
+  menciones?: Record<ScienceMention, PaesMention>
 }
 
-export type PuntajesUsuario = Record<FactorPuntaje, number | null>
+export type UserScores = Record<ScoreFactor, number | null>
 
-export type RespuestasPaes = Record<number, number>
+export type PaesAnswers = Record<number, number>

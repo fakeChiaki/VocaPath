@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { MateriaPaes } from '@/types'
-import { MATERIAS_PAES, PRUEBAS_PAES } from '@/utils/carreras'
+import type { PaesSubject } from '@/types'
+import { PAES_SUBJECTS, PAES_TESTS } from '@/utils/careers'
 import { useScoresStore } from '@/stores/scores'
 
 const scores = useScoresStore()
 
-function textoBadge(materia: MateriaPaes): string {
+function textoBadge(materia: PaesSubject): string {
   const pts = scores.puntajes[materia]
   const base = pts != null ? `${pts} pts` : 'Rendida'
   const mencion = scores.mencionesRendidas[materia]
-  const menciones = PRUEBAS_PAES[materia].menciones
+  const menciones = PAES_TESTS[materia].menciones
   return mencion && menciones ? `${base} · ${menciones[mencion].label}` : base
 }
 </script>
@@ -24,10 +24,10 @@ function textoBadge(materia: MateriaPaes): string {
       </p>
     </div>
     <div class="grid max-w-[760px] grid-cols-1 gap-4.5 sm:grid-cols-2">
-      <div v-for="materia in MATERIAS_PAES" :key="materia" class="rounded-[18px] border border-line bg-white p-6">
+      <div v-for="materia in PAES_SUBJECTS" :key="materia" class="rounded-[18px] border border-line bg-white p-6">
         <div class="flex items-center justify-between">
           <span class="flex size-13 items-center justify-center rounded-[14px] bg-surface text-[26px]">
-            {{ PRUEBAS_PAES[materia].icon }}
+            {{ PAES_TESTS[materia].icon }}
           </span>
           <span
             v-if="scores.estaRendida(materia)"
@@ -36,7 +36,7 @@ function textoBadge(materia: MateriaPaes): string {
             {{ textoBadge(materia) }}
           </span>
         </div>
-        <div class="mt-4 mb-1 font-display text-[19px] font-bold">{{ PRUEBAS_PAES[materia].label }}</div>
+        <div class="mt-4 mb-1 font-display text-[19px] font-bold">{{ PAES_TESTS[materia].label }}</div>
         <div class="mb-4.5 text-[13px] text-slate-500">Prueba de alternativas</div>
         <RouterLink
           :to="`/prueba-paes/${materia}`"

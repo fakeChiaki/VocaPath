@@ -1,28 +1,28 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { api, errorMessage } from '@/api/client'
-import type { ApiPaesDate } from '@/types/api'
+import type { PaesDate } from '@/types/api'
 
-const fechas = ref<ApiPaesDate[]>([])
-const cargando = ref(true)
+const dates = ref<PaesDate[]>([])
+const loading = ref(true)
 const error = ref('')
 
-async function cargar() {
-  cargando.value = true
+async function load() {
+  loading.value = true
   error.value = ''
   try {
-    const { data } = await api.get<ApiPaesDate[]>('/paes-dates')
-    fechas.value = data
+    const { data } = await api.get<PaesDate[]>('/paes-dates')
+    dates.value = data
   } catch (e) {
-    error.value = errorMessage(e, 'No se pudieron cargar las fechas.')
+    error.value = errorMessage(e, 'No se pudieron load las fechas.')
   } finally {
-    cargando.value = false
+    loading.value = false
   }
 }
 
-onMounted(cargar)
+onMounted(load)
 
-const ESTADO_STYLE: Record<ApiPaesDate['status'], string> = {
+const STATUS_STYLES: Record<PaesDate['status'], string> = {
   Próximo: 'bg-[#e7f0ff] text-blue-600',
   Programado: 'bg-slate-100 text-slate-500',
   Finalizado: 'bg-emerald-50 text-emerald-700',
@@ -40,20 +40,20 @@ const ESTADO_STYLE: Record<ApiPaesDate['status'], string> = {
       </p>
     </div>
 
-    <p v-if="cargando" class="text-sm text-slate-500">Cargando fechas…</p>
+    <p v-if="loading" class="text-sm text-slate-500">Cargando fechas…</p>
     <div v-else-if="error" class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800" role="alert">
       {{ error }}
-      <button class="ml-3 cursor-pointer border-none bg-transparent font-semibold text-rose-700 underline" @click="cargar">
+      <button class="ml-3 cursor-pointer border-none bg-transparent font-semibold text-rose-700 underline" @click="load">
         Reintentar
       </button>
     </div>
-    <p v-else-if="fechas.length === 0" class="text-sm text-slate-500">Aún no hay fechas publicadas.</p>
+    <p v-else-if="dates.length === 0" class="text-sm text-slate-500">Aún no hay fechas publicadas.</p>
     <div v-else class="rounded-[20px] border border-line bg-white px-7 shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
       <div
-        v-for="(d, i) in fechas"
+        v-for="(d, i) in dates"
         :key="d.id"
         class="flex items-center gap-5 py-5"
-        :class="i < fechas.length - 1 ? 'border-b border-slate-100' : ''"
+        :class="i < dates.length - 1 ? 'border-b border-slate-100' : ''"
       >
         <span class="flex size-12.5 shrink-0 items-center justify-center rounded-[14px] bg-surface text-2xl">
           {{ d.icon }}
@@ -61,7 +61,7 @@ const ESTADO_STYLE: Record<ApiPaesDate['status'], string> = {
         <div class="min-w-0 flex-1">
           <div class="mb-0.5 flex items-center gap-2.5">
             <span class="text-[11px] font-bold tracking-wide text-slate-400 uppercase">{{ d.phase }}</span>
-            <span class="rounded-full px-2.25 py-0.5 text-[11px] font-semibold" :class="ESTADO_STYLE[d.status]">
+            <span class="rounded-full px-2.25 py-0.5 text-[11px] font-semibold" :class="STATUS_STYLES[d.status]">
               {{ d.status }}
             </span>
           </div>

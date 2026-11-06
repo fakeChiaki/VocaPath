@@ -12,15 +12,15 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref('')
-const cargando = ref(false)
+const loading = ref(false)
 
-async function enviar() {
+async function submit() {
   error.value = ''
   if (password.value !== confirmPassword.value) {
     error.value = 'Las contraseñas no coinciden.'
     return
   }
-  cargando.value = true
+  loading.value = true
   try {
     await auth.register({
       name: name.value.trim(),
@@ -28,11 +28,11 @@ async function enviar() {
       password: password.value,
       confirmPassword: confirmPassword.value,
     })
-    router.push({ name: 'login', query: { registrado: '1' } })
+    router.push({ name: 'login', query: { registered: '1' } })
   } catch (e) {
     error.value = errorMessage(e)
   } finally {
-    cargando.value = false
+    loading.value = false
   }
 }
 </script>
@@ -44,7 +44,7 @@ async function enviar() {
       <p class="mt-1.5 text-sm text-slate-500">Guarda tus puntajes y carreras favoritas.</p>
     </div>
 
-    <form class="rounded-[22px] border border-line bg-white p-8 shadow-[0_10px_28px_rgba(15,23,42,0.06)]" @submit.prevent="enviar">
+    <form class="rounded-[22px] border border-line bg-white p-8 shadow-[0_10px_28px_rgba(15,23,42,0.06)]" @submit.prevent="submit">
       <label for="reg-name" class="text-[13px] font-semibold text-slate-500">Nombre</label>
       <input
         id="reg-name"
@@ -91,10 +91,10 @@ async function enviar() {
 
       <button
         type="submit"
-        :disabled="cargando"
+        :disabled="loading"
         class="w-full cursor-pointer rounded-[13px] border-none bg-gradient-to-br from-blue-600 to-sky-500 px-4 py-3.25 font-display text-[15px] font-semibold text-white disabled:opacity-60"
       >
-        {{ cargando ? 'Creando cuenta…' : 'Crear cuenta' }}
+        {{ loading ? 'Creando cuenta…' : 'Crear cuenta' }}
       </button>
 
       <p class="mt-5 text-center text-sm text-slate-500">

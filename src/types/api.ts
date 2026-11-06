@@ -1,4 +1,4 @@
-export interface ApiCareerWeights {
+export interface CareerWeights {
   nem: number
   ranking: number
   lectora: number
@@ -9,7 +9,7 @@ export interface ApiCareerWeights {
   historiaOCiencias?: boolean
 }
 
-export interface ApiCareer {
+export interface Career {
   id: string
   name: string
   title: string | null
@@ -22,7 +22,7 @@ export interface ApiCareer {
   cutoffScore: number | null
   profile: string | null
   curriculumUrl: string | null
-  weights: ApiCareerWeights
+  weights: CareerWeights
   areaCode: string | null
   areaLabel: string | null
   universityId: string
@@ -32,7 +32,7 @@ export interface ApiCareer {
   universityColor: string
 }
 
-export interface ApiUniversity {
+export interface University {
   id: string
   name: string
   fullName: string
@@ -41,7 +41,7 @@ export interface ApiUniversity {
   websiteUrl: string
 }
 
-export interface ApiPaesDate {
+export interface PaesDate {
   id: string
   phase: string
   title: string
