@@ -14,12 +14,12 @@ const careerId = ref(typeof route.query.career === 'string' ? route.query.career
 const career = computed(() => catalog.getCareer(careerId.value))
 const required = computed(() => (career.value ? requiredFactors(career.value) : []))
 const missing = computed(() =>
-  career.value ? required.value.filter((k) => factorValue(career.value!, scores.puntajes, k) == null) : [],
+  career.value ? required.value.filter((k) => factorValue(career.value!, scores.values, k) == null) : [],
 )
 const noCutoff = computed(() => !!career.value && career.value.cutoffScore == null)
 const ready = computed(() => !!career.value && missing.value.length === 0)
 
-const total = computed(() => (ready.value ? weightedScore(career.value!, scores.puntajes) : 0))
+const total = computed(() => (ready.value ? weightedScore(career.value!, scores.values) : 0))
 const difference = computed(() => total.value - (career.value?.cutoffScore ?? 0))
 const admitted = computed(() => ready.value && difference.value >= 0)
 
@@ -29,8 +29,8 @@ const breakdown = computed(() => {
     key: k,
     label: factorLabel(career.value!, k),
     weight: `${career.value!.weights[k]}%`,
-    score: factorValue(career.value!, scores.puntajes, k)!,
-    contribution: ((career.value!.weights[k] * factorValue(career.value!, scores.puntajes, k)!) / 100).toFixed(1),
+    score: factorValue(career.value!, scores.values, k)!,
+    contribution: ((career.value!.weights[k] * factorValue(career.value!, scores.values, k)!) / 100).toFixed(1),
   }))
 })
 

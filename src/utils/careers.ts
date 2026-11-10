@@ -1,10 +1,5 @@
-import type { PaesSubject, PaesTest, ScoreFactor, UserScores } from '@/types'
+import type { ScoreFactor, UserScores } from '@/types'
 import type { Career } from '@/types/api'
-import testsData from '@/data/preguntas-paes.json'
-
-export const PAES_TESTS = testsData as Record<PaesSubject, PaesTest>
-
-export const PAES_SUBJECTS: PaesSubject[] = ['lectora', 'matematica', 'historia', 'ciencias']
 
 export const SCORE_FACTORS: ScoreFactor[] = ['nem', 'ranking', 'lectora', 'matematica', 'matematica2', 'historia', 'ciencias']
 

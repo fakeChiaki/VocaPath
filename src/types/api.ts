@@ -1,3 +1,5 @@
+import type { ScoreFactor } from '@/types'
+
 export interface CareerWeights {
   nem: number
   ranking: number
@@ -50,4 +52,33 @@ export interface PaesDate {
   dateLabel: string
   status: 'Próximo' | 'Programado' | 'Finalizado'
   icon: string
+}
+
+export interface UserScore {
+  factor: ScoreFactor
+  value: number
+  source: 'manual' | 'paes_attempt'
+  attemptId: string | null
+}
+
+export interface PaesQuestionItem {
+  id: string
+  text: string
+  options: string[]
+}
+
+export interface PaesReviewItem {
+  questionId: string
+  text: string
+  options: string[]
+  correctIndex: number
+  selectedIndex: number
+}
+
+export interface PaesAttemptResult {
+  attemptId: string
+  score: number
+  correctCount: number
+  totalCount: number
+  review: PaesReviewItem[]
 }

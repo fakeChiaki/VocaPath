@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { api, refreshAccessToken } from '@/api/client'
 import { setAccessToken } from '@/api/session'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useScoresStore } from '@/stores/scores'
 
 interface AuthUser {
   id: string
@@ -51,6 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
     setAccessToken(null)
     user.value = null
     useFavoritesStore().reset()
+    useScoresStore().reset()
   }
 
   async function logout() {

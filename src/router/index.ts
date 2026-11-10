@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useScoresStore } from '@/stores/scores'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -50,7 +51,7 @@ router.beforeEach(async (to) => {
   if (to.meta.guestOnly) return auth.isAuthenticated ? '/' : true
   if (to.meta.public) return true
   if (!auth.isAuthenticated) return { name: 'login', query: { redirect: to.fullPath } }
-  await Promise.all([useCatalogStore().load(), useFavoritesStore().load()])
+  await Promise.all([useCatalogStore().load(), useFavoritesStore().load(), useScoresStore().load()])
   return true
 })
 
