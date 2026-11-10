@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ScoreFactor } from '@/types'
 import type { Career } from '@/types/api'
 import { SCORE_FACTORS, FACTOR_LABELS, formatScore, NO_DATA } from '@/utils/careers'
 import { useCatalogStore } from '@/stores/catalog'
@@ -31,6 +32,17 @@ function colorHigherIsBetter(a: number, b: number): [string, string] {
   return a > b ? [BEST, NEUTRAL] : [NEUTRAL, BEST]
 }
 
+// Con "Historia o Ciencias" el peso se declara una sola vez, en la fila de Historia.
+function weightOf(career: Career, factor: ScoreFactor): number {
+  return career.weights.historiaOCiencias && factor === 'ciencias' ? 0 : career.weights[factor]
+}
+
+function weightText(career: Career, factor: ScoreFactor): string {
+  const weight = weightOf(career, factor)
+  if (career.weights.historiaOCiencias && factor === 'ciencias') return '—'
+  return career.weights.historiaOCiencias && factor === 'historia' ? `${weight}% (o Ciencias)` : `${weight}%`
+}
+
 const rows = computed<ComparisonRow[]>(() => {
   const [ca, cb] = selected.value
   if (!ca || !cb) return []
@@ -47,8 +59,8 @@ const rows = computed<ComparisonRow[]>(() => {
   out.push({ label: 'Duración', a: ca.duration ?? NO_DATA, b: cb.duration ?? NO_DATA, aColor: NEUTRAL, bColor: NEUTRAL })
 
   for (const k of SCORE_FACTORS) {
-    if (ca.weights[k] === 0 && cb.weights[k] === 0) continue
-    out.push({ label: `Ponderación ${FACTOR_LABELS[k]}`, a: `${ca.weights[k]}%`, b: `${cb.weights[k]}%`, aColor: NEUTRAL, bColor: NEUTRAL })
+    if (weightOf(ca, k) === 0 && weightOf(cb, k) === 0) continue
+    out.push({ label: `Ponderación ${FACTOR_LABELS[k]}`, a: weightText(ca, k), b: weightText(cb, k), aColor: NEUTRAL, bColor: NEUTRAL })
   }
 
   return out

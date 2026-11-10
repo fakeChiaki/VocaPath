@@ -84,14 +84,16 @@ const features = [
           </RouterLink>
         </div>
         <div class="mt-10 flex gap-8">
-          <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.loaded ? catalog.careers.length + '+' : '—' }}</div>
-            <div class="text-[13px] text-slate-500">carreras</div>
-          </div>
-          <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.loaded ? catalog.universities.length : '—' }}</div>
-            <div class="text-[13px] text-slate-500">universidades</div>
-          </div>
+          <template v-if="catalog.loaded">
+            <div>
+              <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.careers.length }}</div>
+              <div class="text-[13px] text-slate-500">carreras</div>
+            </div>
+            <div>
+              <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.universities.length }}</div>
+              <div class="text-[13px] text-slate-500">universidades</div>
+            </div>
+          </template>
           <div>
             <div class="font-display text-[26px] font-bold text-blue-600">{{ PAES_SUBJECTS.length }}</div>
             <div class="text-[13px] text-slate-500">pruebas PAES</div>
