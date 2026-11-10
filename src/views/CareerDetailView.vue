@@ -86,7 +86,7 @@ function goToSimulator() {
         </div>
 
         <a
-          v-if="career.curriculumUrl"
+          v-if="career.curriculumUrl?.startsWith('http')"
           :href="career.curriculumUrl"
           target="_blank"
           rel="noopener noreferrer"

@@ -10,9 +10,23 @@ type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean }
 
 let refreshing: Promise<string> | null = null
 
-export function refreshAccessToken() {
-  refreshing ??= axios
-    .post<{ accessToken: string }>('/auth/refresh', null, { baseURL: api.defaults.baseURL, withCredentials: true })
+const requestRefresh = () =>
+  axios.post<{ accessToken: string }>('/auth/refresh', null, { baseURL: api.defaults.baseURL, withCredentials: true })
+
+// Con dos pestañas abiertas, la otra puede rotar la cookie justo antes: se reintenta una vez con la cookie nueva.
+async function refreshWithRetry() {
+  try {
+    return await requestRefresh()
+  } catch (error) {
+    if (!axios.isAxiosError(error) || error.response?.status !== 401) throw error
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    return requestRefresh()
+  }
+}
+
+// retry=false: al abrir la app sin sesión el 401 es lo esperado y no debe demorar la carga
+export function refreshAccessToken(retry = true) {
+  refreshing ??= (retry ? refreshWithRetry() : requestRefresh())
     .then(({ data }) => {
       setAccessToken(data.accessToken)
       return data.accessToken

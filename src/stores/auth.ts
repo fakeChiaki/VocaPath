@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function init() {
     if (ready.value) return
     try {
-      user.value = userFromToken(await refreshAccessToken())
+      user.value = userFromToken(await refreshAccessToken(false))
     } catch {
       user.value = null
     }
@@ -58,6 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     try {
       await api.post('/auth/logout')
+    } catch {
+      // sin conexión: se cierra igual en el navegador y el servidor expira el token
     } finally {
       clear()
     }
