@@ -49,8 +49,7 @@ router.beforeEach(async (to) => {
   await auth.init()
 
   if (to.meta.guestOnly) return auth.isAuthenticated ? '/' : true
-  if (to.meta.public) return true
-  if (!auth.isAuthenticated) return { name: 'login', query: { redirect: to.fullPath } }
+  if (!auth.isAuthenticated) return to.meta.public ? true : { name: 'login', query: { redirect: to.fullPath } }
   await Promise.all([useCatalogStore().load(), useFavoritesStore().load(), useScoresStore().load()])
   return true
 })
