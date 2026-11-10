@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Carrera } from '@/types'
+import type { Career } from '@/types/api'
 import CareerCard from '@/components/careers/CareerCard.vue'
 import { useFavoritesStore } from '@/stores/favorites'
-import { getCarrera } from '@/utils/carreras'
+import { useCatalogStore } from '@/stores/catalog'
 
 const router = useRouter()
 const favorites = useFavoritesStore()
+const catalog = useCatalogStore()
 
-const favCareers = computed<Carrera[]>(() =>
-  favorites.ids.map((id) => getCarrera(id)).filter((c): c is Carrera => !!c),
+const favCareers = computed<Career[]>(() =>
+  favorites.ids.map((id) => catalog.getCareer(id)).filter((c): c is Career => !!c),
 )
 </script>
 
@@ -18,7 +19,7 @@ const favCareers = computed<Carrera[]>(() =>
   <section class="animate-vp-fade">
     <div class="mb-6">
       <h1 class="mb-2 font-display text-4xl font-bold tracking-tight">♥ Mis carreras favoritas</h1>
-      <p class="text-base text-slate-500">Tus carreras guardadas. Se almacenan en el caché de tu navegador.</p>
+      <p class="text-base text-slate-500">Tus carreras guardadas. Se guardan en tu cuenta.</p>
     </div>
 
     <div
@@ -37,7 +38,7 @@ const favCareers = computed<Carrera[]>(() =>
     </div>
 
     <div v-else class="grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
-      <CareerCard v-for="c in favCareers" :key="c.id" :carrera="c" />
+      <CareerCard v-for="c in favCareers" :key="c.id" :career="c" />
     </div>
   </section>
 </template>

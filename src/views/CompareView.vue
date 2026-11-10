@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Carrera } from '@/types'
-import { FACTOR_KEYS, FACTOR_LABEL, getCarrera, uniColor } from '@/utils/carreras'
+import type { ScoreFactor } from '@/types'
+import type { Career } from '@/types/api'
+import { SCORE_FACTORS, FACTOR_LABELS, formatScore, NO_DATA } from '@/utils/careers'
+import { useCatalogStore } from '@/stores/catalog'
 import { useCareerFilter } from '@/composables/useCareerFilter'
 import { useCompareStore } from '@/stores/compare'
 import CareerSearchBar from '@/components/careers/CareerSearchBar.vue'
 
 const compare = useCompareStore()
-const { search, filtradas } = useCareerFilter()
+const catalog = useCatalogStore()
+const { search, filtered } = useCareerFilter()
 
-const seleccionadas = computed<Carrera[]>(() => compare.ids.map((id) => getCarrera(id)).filter((c): c is Carrera => !!c))
+const selected = computed<Career[]>(() => compare.ids.map((id) => catalog.getCareer(id)).filter((c): c is Career => !!c))
 
-interface FilaComparacion {
+interface ComparisonRow {
   label: string
   a: string
   b: string
@@ -19,34 +22,45 @@ interface FilaComparacion {
   bColor: string
 }
 
-const NEUTRO = '#0f172a'
-const MEJOR = '#059669'
+const NEUTRAL = '#0f172a'
+const BEST = '#059669'
 
 // Resalta en verde el valor "mejor" solo cuando más alto = objetivamente mejor (p. ej. vacantes).
 // Para corte, puntajes y ponderaciones un número mayor no significa "mejor carrera", así que quedan neutros.
-function colorMayorEsMejor(a: number, b: number): [string, string] {
-  if (a === b) return [NEUTRO, NEUTRO]
-  return a > b ? [MEJOR, NEUTRO] : [NEUTRO, MEJOR]
+function colorHigherIsBetter(a: number, b: number): [string, string] {
+  if (a === b) return [NEUTRAL, NEUTRAL]
+  return a > b ? [BEST, NEUTRAL] : [NEUTRAL, BEST]
 }
 
-const filas = computed<FilaComparacion[]>(() => {
-  const [ca, cb] = seleccionadas.value
+// Con "Historia o Ciencias" el peso se declara una sola vez, en la fila de Historia.
+function weightOf(career: Career, factor: ScoreFactor): number {
+  return career.weights.historiaOCiencias && factor === 'ciencias' ? 0 : career.weights[factor]
+}
+
+function weightText(career: Career, factor: ScoreFactor): string {
+  const weight = weightOf(career, factor)
+  if (career.weights.historiaOCiencias && factor === 'ciencias') return '—'
+  return career.weights.historiaOCiencias && factor === 'historia' ? `${weight}% (o Ciencias)` : `${weight}%`
+}
+
+const rows = computed<ComparisonRow[]>(() => {
+  const [ca, cb] = selected.value
   if (!ca || !cb) return []
 
-  const out: FilaComparacion[] = []
+  const out: ComparisonRow[] = []
 
-  out.push({ label: 'Puntaje de corte 2025', a: ca.ultimo.toFixed(1), b: cb.ultimo.toFixed(1), aColor: NEUTRO, bColor: NEUTRO })
+  out.push({ label: 'Puntaje de corte', a: formatScore(ca.cutoffScore), b: formatScore(cb.cutoffScore), aColor: NEUTRAL, bColor: NEUTRAL })
 
-  out.push({ label: 'Primer seleccionado', a: ca.primero.toFixed(1), b: cb.primero.toFixed(1), aColor: NEUTRO, bColor: NEUTRO })
+  out.push({ label: 'Primer seleccionado', a: formatScore(ca.firstSelectedScore), b: formatScore(cb.firstSelectedScore), aColor: NEUTRAL, bColor: NEUTRAL })
 
-  const [vacantesAColor, vacantesBColor] = colorMayorEsMejor(ca.vacantes, cb.vacantes)
+  const [vacantesAColor, vacantesBColor] = colorHigherIsBetter(ca.vacantes, cb.vacantes)
   out.push({ label: 'Vacantes', a: String(ca.vacantes), b: String(cb.vacantes), aColor: vacantesAColor, bColor: vacantesBColor })
 
-  out.push({ label: 'Duración', a: ca.duracion, b: cb.duracion, aColor: NEUTRO, bColor: NEUTRO })
+  out.push({ label: 'Duración', a: ca.duration ?? NO_DATA, b: cb.duration ?? NO_DATA, aColor: NEUTRAL, bColor: NEUTRAL })
 
-  for (const k of FACTOR_KEYS) {
-    if (ca.pond[k] === 0 && cb.pond[k] === 0) continue
-    out.push({ label: `Ponderación ${FACTOR_LABEL[k]}`, a: `${ca.pond[k]}%`, b: `${cb.pond[k]}%`, aColor: NEUTRO, bColor: NEUTRO })
+  for (const k of SCORE_FACTORS) {
+    if (weightOf(ca, k) === 0 && weightOf(cb, k) === 0) continue
+    out.push({ label: `Ponderación ${FACTOR_LABELS[k]}`, a: weightText(ca, k), b: weightText(cb, k), aColor: NEUTRAL, bColor: NEUTRAL })
   }
 
   return out
@@ -64,7 +78,7 @@ const filas = computed<FilaComparacion[]>(() => {
       <div class="rounded-[18px] border border-line bg-white p-4">
         <CareerSearchBar v-model="search" placeholder="Buscar carrera…" class="mb-3.5" />
         <div class="mb-2.5 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400">{{ compare.count }} / 2 seleccionadas</span>
+          <span class="text-xs font-semibold text-slate-400">{{ compare.count }} / 2 selected</span>
           <button
             v-if="compare.count > 0"
             class="cursor-pointer border-none bg-transparent text-xs font-semibold text-rose-600"
@@ -75,7 +89,7 @@ const filas = computed<FilaComparacion[]>(() => {
         </div>
         <div class="flex max-h-[520px] flex-col gap-2 overflow-y-auto">
           <button
-            v-for="c in filtradas"
+            v-for="c in filtered"
             :key="c.id"
             class="flex cursor-pointer items-center gap-3 rounded-xl border-[1.5px] px-3.5 py-3 text-left"
             :class="
@@ -92,8 +106,8 @@ const filas = computed<FilaComparacion[]>(() => {
               {{ compare.has(c.id) ? compare.ids.indexOf(c.id) + 1 : '' }}
             </span>
             <span class="min-w-0">
-              <span class="block font-display text-sm font-semibold">{{ c.nombre }}</span>
-              <span class="block text-xs text-slate-500">{{ c.uni }}</span>
+              <span class="block font-display text-sm font-semibold">{{ c.name }}</span>
+              <span class="block text-xs text-slate-500">{{ c.universityName }}</span>
             </span>
           </button>
         </div>
@@ -102,7 +116,7 @@ const filas = computed<FilaComparacion[]>(() => {
       <div>
         <template v-if="compare.hasTwo">
           <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div v-for="c in seleccionadas" :key="c.id" class="relative rounded-[18px] border border-line bg-white p-5.5">
+            <div v-for="c in selected" :key="c.id" class="relative rounded-[18px] border border-line bg-white p-5.5">
               <button
                 class="absolute top-3.5 right-3.5 flex size-7 cursor-pointer items-center justify-center rounded-lg border-none bg-slate-100 text-sm text-slate-500"
                 aria-label="Quitar de la comparación"
@@ -110,20 +124,20 @@ const filas = computed<FilaComparacion[]>(() => {
               >
                 ✕
               </button>
-              <span class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" :style="{ background: uniColor(c.uni) }">
-                {{ c.uni }}
+              <span class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" :style="{ background: catalog.universityColor(c.universityName) }">
+                {{ c.universityName }}
               </span>
-              <div class="mt-3 mb-1.5 font-display text-[19px] font-bold">{{ c.nombre }}</div>
-              <div class="text-[13px] leading-relaxed text-slate-500">{{ c.perfil }}</div>
+              <div class="mt-3 mb-1.5 font-display text-[19px] font-bold">{{ c.name }}</div>
+              <div v-if="c.profile" class="text-[13px] leading-relaxed text-slate-500">{{ c.profile }}</div>
             </div>
           </div>
 
           <div class="overflow-hidden rounded-[18px] border border-line bg-white">
             <div
-              v-for="(r, i) in filas"
+              v-for="(r, i) in rows"
               :key="r.label"
               class="grid grid-cols-[1fr_1.3fr_1fr] items-center px-5.5 py-3.5"
-              :class="i < filas.length - 1 ? 'border-b border-slate-100' : ''"
+              :class="i < rows.length - 1 ? 'border-b border-slate-100' : ''"
             >
               <div class="font-display text-base font-bold" :style="{ color: r.aColor }">{{ r.a }}</div>
               <div class="text-center text-[13px] font-semibold text-slate-500">{{ r.label }}</div>

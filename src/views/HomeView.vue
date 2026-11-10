@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { CARRERAS, MATERIAS_PAES, UNIVERSIDADES } from '@/utils/carreras'
+import { PAES_SUBJECTS } from '@/utils/paes'
+import { useCatalogStore } from '@/stores/catalog'
 import { useFavoritesStore } from '@/stores/favorites'
 
 const favorites = useFavoritesStore()
+const catalog = useCatalogStore()
 
 const features = [
   {
@@ -82,16 +84,18 @@ const features = [
           </RouterLink>
         </div>
         <div class="mt-10 flex gap-8">
+          <template v-if="catalog.loaded">
+            <div>
+              <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.careers.length }}</div>
+              <div class="text-[13px] text-slate-500">carreras</div>
+            </div>
+            <div>
+              <div class="font-display text-[26px] font-bold text-blue-600">{{ catalog.universities.length }}</div>
+              <div class="text-[13px] text-slate-500">universidades</div>
+            </div>
+          </template>
           <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ CARRERAS.length }}+</div>
-            <div class="text-[13px] text-slate-500">carreras</div>
-          </div>
-          <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ UNIVERSIDADES.length }}</div>
-            <div class="text-[13px] text-slate-500">universidades</div>
-          </div>
-          <div>
-            <div class="font-display text-[26px] font-bold text-blue-600">{{ MATERIAS_PAES.length }}</div>
+            <div class="font-display text-[26px] font-bold text-blue-600">{{ PAES_SUBJECTS.length }}</div>
             <div class="text-[13px] text-slate-500">pruebas PAES</div>
           </div>
         </div>
@@ -158,14 +162,6 @@ const features = [
         <div class="mt-3.5 mb-1.5 font-display text-[16.5px] font-bold">{{ f.title }}</div>
         <div class="text-sm leading-relaxed text-slate-500">{{ f.desc }}</div>
       </RouterLink>
-    </div>
-
-    <div class="mt-5.5 flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 text-[13.5px] text-orange-900">
-      <span class="text-lg">⚠️</span>
-      <span>
-        Tus favoritas y puntajes se guardan en <strong>el caché de tu navegador</strong>. Si lo limpias o usas modo
-        incógnito, podrías perderlos.
-      </span>
     </div>
   </section>
 </template>

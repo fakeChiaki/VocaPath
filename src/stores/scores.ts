@@ -1,81 +1,82 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { FactorPuntaje, MateriaPaes, MencionCiencias, PuntajesUsuario, RespuestasPaes } from '@/types'
-import { loadJSON, saveJSON } from '@/utils/storage'
+import { api, errorMessage } from '@/api/client'
+import type { PaesSubject, ScoreFactor, UserScores } from '@/types'
+import type { UserScore } from '@/types/api'
 
-const KEY_SCORES = 'vp_scores'
-const KEY_COMPLETED = 'vp_paesdone'
-const KEY_ANSWERS = 'vp_paes_answers'
-const KEY_MENCION = 'vp_paes_mencion'
+const LEGACY_KEYS = ['vp_scores', 'vp_paesdone', 'vp_paes_answers', 'vp_paes_mencion']
 
-const EMPTY_SCORES: PuntajesUsuario = {
-  lectora: null,
-  matematica: null,
-  historia: null,
-  ciencias: null,
-  nem: null,
-  ranking: null,
+function emptyScores(): UserScores {
+  return { lectora: null, matematica: null, matematica2: null, historia: null, ciencias: null, nem: null, ranking: null }
 }
 
 export const useScoresStore = defineStore('scores', () => {
-  const puntajes = ref<PuntajesUsuario>({ ...EMPTY_SCORES, ...loadJSON<Partial<PuntajesUsuario>>(KEY_SCORES, {}) })
-  const paesCompletadas = ref<MateriaPaes[]>(loadJSON<MateriaPaes[]>(KEY_COMPLETED, []))
-  const respuestasGuardadas = ref<Partial<Record<MateriaPaes, RespuestasPaes>>>(
-    loadJSON<Partial<Record<MateriaPaes, RespuestasPaes>>>(KEY_ANSWERS, {}),
-  )
-  const mencionesRendidas = ref<Partial<Record<MateriaPaes, MencionCiencias>>>(
-    loadJSON<Partial<Record<MateriaPaes, MencionCiencias>>>(KEY_MENCION, {}),
-  )
+  const values = ref<UserScores>(emptyScores())
+  const sources = ref<Partial<Record<ScoreFactor, UserScore['source']>>>({})
+  const loaded = ref(false)
+  const error = ref('')
 
-  const registrados = computed(() => Object.values(puntajes.value).filter((v) => v != null).length)
+  const registeredCount = computed(() => Object.values(values.value).filter((v) => v != null).length)
 
-  function persistir(): void {
-    saveJSON(KEY_SCORES, puntajes.value)
-  }
-
-  function setPuntaje(factor: FactorPuntaje, valor: number | null): void {
-    const num = valor == null || Number.isNaN(valor) ? null : Math.max(100, Math.min(1000, Math.round(valor)))
-    puntajes.value = { ...puntajes.value, [factor]: num }
-    persistir()
-  }
-
-  function borrarPuntaje(factor: FactorPuntaje): void {
-    puntajes.value = { ...puntajes.value, [factor]: null }
-    persistir()
-  }
-
-  function estaRendida(materia: MateriaPaes): boolean {
-    return paesCompletadas.value.includes(materia)
-  }
-
-  /** Guarda el resultado de una prueba tipo PAES: puntaje, materia rendida, respuestas para revisión y mención (si aplica). */
-  function guardarResultadoPaes(
-    materia: MateriaPaes,
-    respuestas: RespuestasPaes,
-    puntaje: number,
-    mencion?: MencionCiencias,
-  ): void {
-    puntajes.value = { ...puntajes.value, [materia]: puntaje }
-    if (!paesCompletadas.value.includes(materia)) paesCompletadas.value = [...paesCompletadas.value, materia]
-    respuestasGuardadas.value = { ...respuestasGuardadas.value, [materia]: respuestas }
-    if (mencion) {
-      mencionesRendidas.value = { ...mencionesRendidas.value, [materia]: mencion }
-      saveJSON(KEY_MENCION, mencionesRendidas.value)
+  async function load() {
+    if (loaded.value) return
+    try {
+      const { data } = await api.get<UserScore[]>('/scores')
+      values.value = emptyScores()
+      sources.value = {}
+      for (const s of data) {
+        values.value[s.factor] = s.value
+        sources.value[s.factor] = s.source
+      }
+      loaded.value = true
+      LEGACY_KEYS.forEach((key) => localStorage.removeItem(key))
+    } catch (e) {
+      error.value = errorMessage(e, 'No se pudieron cargar tus puntajes.')
     }
-    persistir()
-    saveJSON(KEY_COMPLETED, paesCompletadas.value)
-    saveJSON(KEY_ANSWERS, respuestasGuardadas.value)
   }
 
-  return {
-    puntajes,
-    paesCompletadas,
-    respuestasGuardadas,
-    mencionesRendidas,
-    registrados,
-    setPuntaje,
-    borrarPuntaje,
-    estaRendida,
-    guardarResultadoPaes,
+  async function set(factor: ScoreFactor, value: number) {
+    const score = Math.max(100, Math.min(1000, Math.round(value)))
+    const previous = { value: values.value[factor], source: sources.value[factor] }
+    values.value[factor] = score
+    sources.value[factor] = 'manual'
+    try {
+      await api.put(`/scores/${factor}`, { value: score })
+    } catch (e) {
+      values.value[factor] = previous.value
+      sources.value[factor] = previous.source
+      error.value = errorMessage(e, 'No se pudo guardar el puntaje.')
+    }
   }
+
+  async function remove(factor: ScoreFactor) {
+    const previous = { value: values.value[factor], source: sources.value[factor] }
+    values.value[factor] = null
+    delete sources.value[factor]
+    try {
+      await api.delete(`/scores/${factor}`)
+    } catch (e) {
+      values.value[factor] = previous.value
+      sources.value[factor] = previous.source
+      error.value = errorMessage(e, 'No se pudo eliminar el puntaje.')
+    }
+  }
+
+  function applyAttempt(subject: PaesSubject, score: number) {
+    values.value[subject] = score
+    sources.value[subject] = 'paes_attempt'
+  }
+
+  function hasAttempt(subject: PaesSubject) {
+    return sources.value[subject] === 'paes_attempt'
+  }
+
+  function reset() {
+    values.value = emptyScores()
+    sources.value = {}
+    loaded.value = false
+    error.value = ''
+  }
+
+  return { values, loaded, error, registeredCount, load, set, remove, applyAttempt, hasAttempt, reset }
 })
