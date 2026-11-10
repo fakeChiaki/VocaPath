@@ -5,14 +5,3 @@ export type ScoreFactor = PaesSubject | 'matematica2' | 'nem' | 'ranking'
 export type ScienceMention = 'biologia' | 'fisica' | 'quimica'
 
 export type UserScores = Record<ScoreFactor, number | null>
-
-export interface VocationalOption {
-  label: string
-  area: string
-}
-
-export interface VocationalQuestion {
-  id: string
-  text: string
-  opts: VocationalOption[]
-}

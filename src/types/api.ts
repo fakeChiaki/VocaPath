@@ -82,3 +82,24 @@ export interface PaesAttemptResult {
   totalCount: number
   review: PaesReviewItem[]
 }
+
+export interface SimulationResult {
+  career: { id: string; name: string; universityName: string; cutoffScore: number | null }
+  status: 'missing_scores' | 'cutoff_unavailable' | 'success' | 'not_enough'
+  missingFactors: ScoreFactor[]
+  missingAnyOf: ['historia', 'ciencias'] | null
+  weightedScore: number | null
+}
+
+export interface VocationalQuestionItem {
+  id: string
+  text: string
+  options: { id: string; label: string }[]
+}
+
+export interface VocationalResult {
+  attemptId: string
+  affinity: Record<string, number>
+  topAreas: string[]
+  recommendedCareers: Career[]
+}

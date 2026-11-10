@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { factorLabel, requiredFactors, formatScore, weightedScore, factorValue } from '@/utils/careers'
+import { api, errorMessage } from '@/api/client'
+import type { SimulationResult } from '@/types/api'
+import { FACTOR_LABELS, factorLabel, factorValue, formatScore, requiredFactors } from '@/utils/careers'
 import { useCatalogStore } from '@/stores/catalog'
 import { useScoresStore } from '@/stores/scores'
 
@@ -10,32 +12,65 @@ const scores = useScoresStore()
 const catalog = useCatalogStore()
 
 const careerId = ref(typeof route.query.career === 'string' ? route.query.career : '')
+watch(
+  () => route.query.career,
+  (value) => {
+    careerId.value = typeof value === 'string' ? value : ''
+  },
+)
 
 const career = computed(() => catalog.getCareer(careerId.value))
-const required = computed(() => (career.value ? requiredFactors(career.value) : []))
-const missing = computed(() =>
-  career.value ? required.value.filter((k) => factorValue(career.value!, scores.values, k) == null) : [],
-)
-const noCutoff = computed(() => !!career.value && career.value.cutoffScore == null)
-const ready = computed(() => !!career.value && missing.value.length === 0)
+const result = ref<SimulationResult | null>(null)
+const loading = ref(false)
+const error = ref('')
+let lastRequest = 0
 
-const total = computed(() => (ready.value ? weightedScore(career.value!, scores.values) : 0))
-const difference = computed(() => total.value - (career.value?.cutoffScore ?? 0))
-const admitted = computed(() => ready.value && difference.value >= 0)
+async function simulate() {
+  result.value = null
+  error.value = ''
+  if (!career.value) return
+  const request = ++lastRequest
+  loading.value = true
+  try {
+    const { data } = await api.get<SimulationResult>(`/simulator/${career.value.id}`)
+    if (request === lastRequest) result.value = data
+  } catch (e) {
+    if (request === lastRequest) error.value = errorMessage(e)
+  } finally {
+    if (request === lastRequest) loading.value = false
+  }
+}
+
+watch(careerId, simulate, { immediate: true })
+
+const scored = computed(() => result.value?.status === 'success' || result.value?.status === 'not_enough')
+const admitted = computed(() => result.value?.status === 'success')
+const total = computed(() => result.value?.weightedScore ?? 0)
+const cutoff = computed(() => career.value?.cutoffScore ?? 0)
+const difference = computed(() => total.value - cutoff.value)
+
+const missingLabels = computed(() => [
+  ...(result.value?.missingFactors ?? []).map((f) => FACTOR_LABELS[f]),
+  ...(result.value?.missingAnyOf ? ['Historia o Ciencias (el mayor)'] : []),
+])
 
 const breakdown = computed(() => {
-  if (!ready.value || !career.value) return []
-  return required.value.map((k) => ({
-    key: k,
-    label: factorLabel(career.value!, k),
-    weight: `${career.value!.weights[k]}%`,
-    score: factorValue(career.value!, scores.values, k)!,
-    contribution: ((career.value!.weights[k] * factorValue(career.value!, scores.values, k)!) / 100).toFixed(1),
-  }))
+  const c = career.value
+  if (!scored.value || !c) return []
+  return requiredFactors(c).map((k) => {
+    const value = factorValue(c, scores.values, k) ?? 0
+    return {
+      key: k,
+      label: factorLabel(c, k),
+      weight: `${c.weights[k]}%`,
+      score: value,
+      contribution: ((c.weights[k] * value) / 100).toFixed(1),
+    }
+  })
 })
 
 const barScore = computed(() => `${Math.min(100, (total.value / 1100) * 100)}%`)
-const barCutoff = computed(() => `${Math.min(100, ((career.value?.cutoffScore ?? 0) / 1100) * 100)}%`)
+const barCutoff = computed(() => `${Math.min(100, (cutoff.value / 1100) * 100)}%`)
 </script>
 
 <template>
@@ -49,9 +84,9 @@ const barCutoff = computed(() => `${Math.min(100, ((career.value?.cutoffScore ??
     </div>
 
     <div class="mb-4.5 rounded-[18px] border border-line bg-white p-5.5">
-      <label for="sim-carrera" class="text-[13px] font-semibold text-slate-500">Elige la carrera a simular</label>
+      <label for="sim-career" class="text-[13px] font-semibold text-slate-500">Elige la carrera a simular</label>
       <select
-        id="sim-carrera"
+        id="sim-career"
         v-model="careerId"
         class="mt-2 w-full cursor-pointer rounded-[13px] border-[1.5px] border-line bg-surface px-4 py-3.5 font-display text-[15px] font-semibold text-ink"
       >
@@ -61,14 +96,26 @@ const barCutoff = computed(() => `${Math.min(100, ((career.value?.cutoffScore ??
     </div>
 
     <template v-if="career">
-      <div v-if="noCutoff" class="rounded-[20px] border-[1.5px] border-slate-200 bg-slate-50 p-7.5 text-center">
+      <p v-if="loading" class="text-sm text-slate-500">Calculando…</p>
+      <div v-else-if="error" class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800" role="alert">
+        {{ error }}
+        <button class="ml-3 cursor-pointer border-none bg-transparent font-semibold text-rose-700 underline" @click="simulate">
+          Reintentar
+        </button>
+      </div>
+
+      <div
+        v-else-if="result?.status === 'cutoff_unavailable'"
+        class="rounded-[20px] border-[1.5px] border-slate-200 bg-slate-50 p-7.5 text-center"
+      >
         <div class="mb-2.5 text-[38px]">🔒</div>
         <div class="mb-1.5 font-display text-[19px] font-bold">Esta carrera no publica su puntaje de corte</div>
         <div class="text-[14.5px] text-slate-600">
           Sin ese dato no podemos comparar tu puntaje ponderado con el de <strong>{{ career.name }}</strong>.
         </div>
       </div>
-      <template v-else-if="ready">
+
+      <template v-else-if="scored">
         <div
           class="mb-4.5 rounded-[20px] border-[1.5px] p-7"
           :class="admitted ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'"
@@ -117,9 +164,7 @@ const barCutoff = computed(() => `${Math.min(100, ((career.value?.cutoffScore ??
 
         <h3 class="mb-3 font-display text-[17px] font-bold">Desglose ponderado</h3>
         <div class="overflow-hidden rounded-[18px] border border-line bg-white">
-          <div
-            class="grid grid-cols-[1.4fr_1fr_1fr_1fr] bg-surface px-5.5 py-3 text-xs font-bold text-slate-500"
-          >
+          <div class="grid grid-cols-[1.4fr_1fr_1fr_1fr] bg-surface px-5.5 py-3 text-xs font-bold text-slate-500">
             <span>Factor</span>
             <span class="text-center">Pond.</span>
             <span class="text-center">Tu puntaje</span>
@@ -138,12 +183,15 @@ const barCutoff = computed(() => `${Math.min(100, ((career.value?.cutoffScore ??
         </div>
       </template>
 
-      <div v-else class="rounded-[20px] border-[1.5px] border-orange-200 bg-orange-50 p-7.5 text-center">
+      <div
+        v-else-if="result?.status === 'missing_scores'"
+        class="rounded-[20px] border-[1.5px] border-orange-200 bg-orange-50 p-7.5 text-center"
+      >
         <div class="mb-2.5 text-[38px]">📋</div>
         <div class="mb-1.5 font-display text-[19px] font-bold text-orange-900">Te faltan puntajes para simular</div>
         <div class="mb-4.5 text-[14.5px] text-orange-900">
           Para <strong>{{ career.name }}</strong> necesitas registrar:
-          <strong>{{ missing.map((k) => factorLabel(career!, k)).join(', ') }}</strong
+          <strong>{{ missingLabels.join(', ') }}</strong
           >.
         </div>
         <RouterLink

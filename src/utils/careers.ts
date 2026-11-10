@@ -58,14 +58,3 @@ export function factorValue(career: Career, scores: UserScores, factor: ScoreFac
   return scores[factor]
 }
 
-/** Puntaje ponderado del usuario para una carrera (asume puntajes completos). */
-export function weightedScore(career: Career, scores: UserScores): number {
-  let total = 0
-  for (const k of requiredFactors(career)) total += career.weights[k] * (factorValue(career, scores, k) ?? 0)
-  return total / 100
-}
-
-/** Puntaje PAES estimado a partir de respuestas correctas (escala 100–1000). */
-export function paesScore(correct: number, total: number): number {
-  return Math.round(450 + (correct / total) * 550)
-}
